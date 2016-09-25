@@ -1,0 +1,20 @@
+load:
+  - src/js/BasicShapeContainer/BasicShapeContainer.js
+  - src/js/Camera/Camera.js
+  - src/js/Camera/Orbital.js
+  - src/js/Definitions/Definitions.js
+  - src/js/GraphicalObject/GraphicalObject.js
+  - src/js/GraphicalObject/RoundBody.js
+  - src/js/GraphicalObject/Sphere.js
+  - src/js/GraphicalObject/Cylinder.js
+  - src/js/GraphicContainer/GraphicContainer.js
+  - src/js/Scene/Scene.js
+  - src/js/Shader/Compiler.js
+  - src/js/Shader/Linker.js
+  - src/js/ModelViewMatrixStack.js
+  - src/js/gl-matrix.js
+  - src/js/jquery-2.2.4.min.js
+  - src/js/webgl-utils.js
+
+test:
+  - test/*.js

@@ -1,0 +1,202 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="estilo.css">
+    <title>Trabajo Pr&#225;ctico</title>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+    <script type="text/javascript" src="js/gl-matrix.js"></script>
+    <script type="text/javascript" src="js/webgl-utils.js"></script>
+    <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="js/Definitions/Definitions.js"></script>
+    <script type="text/javascript" src="js/Shader/Compiler.js"></script>
+    <script type="text/javascript" src="js/Shader/Linker.js"></script>
+    <script type="text/javascript" src="js/ModelViewMatrixStack.js"></script>
+    <script type="text/javascript" src="js/GraphicContainer/GraphicContainer.js"></script>
+    <script type="text/javascript" src="js/BasicShapeContainer/BasicShapeContainer.js"></script>
+    <script type="text/javascript" src="js/Scene/Scene.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/GraphicalObject.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/RoundBody.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Cylinder.js"></script>
+    <script type="text/javascript" src="js/Camera/Camera.js"></script>
+    <script type="text/javascript" src="js/Camera/Orbital.js"></script>
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+            precision mediump float;
+    varying vec2 vTextureCoord;
+    varying vec3 vLightWeighting;
+    uniform sampler2D uSampler;
+void main() {
+    vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+}
+
+
+
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+
+    uniform mat4 uViewMatrix;
+    uniform mat4 uModelMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat3 uNMatrix;
+
+    uniform vec3 uAmbientColor;
+
+    uniform vec3 uLightPosition;
+    uniform vec3 uDirectionalColor;
+
+    uniform bool uUseLighting;
+
+    varying vec2 vTextureCoord;
+    varying vec3 vLightWeighting;
+
+void main() {
+    // Transformamos al vértice al espacio de la cámara
+    vec4 pos_camera_view = uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);
+
+    // Transformamos al vértice al espacio de la proyección
+    gl_Position = uPMatrix * pos_camera_view;
+
+    // Coordenada de textura sin modifiaciones
+    vTextureCoord = aTextureCoord;
+
+    ////////////////////////////////////////////
+    // Calculos de la iluminación
+    vec3 light_dir =  uLightPosition - vec3( pos_camera_view );
+    normalize(light_dir);
+    if (!uUseLighting)
+    {
+        vLightWeighting = vec3(1.0, 1.0, 1.0);
+    }
+    else
+    {
+        vec3 transformedNormal = normalize(uNMatrix * aVertexNormal);
+        float directionalLightWeighting = max(dot(transformedNormal, light_dir), 0.0);
+        vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+    }
+    ////////////////////////////////////////////
+}
+
+
+
+
+    </script>
+
+    <script type="text/javascript">
+        function webGLStart() {
+            try {
+                var scene = new Scene();
+                scene.tick();
+            } catch (e) {
+                alert(e.name + " " + e.message);
+            }
+        }
+    </script>
+
+</head>
+<body onload="webGLStart();">
+<div style="text-align: center;">
+    <canvas id="TpSistemasGraficosCanvas" style="border: none;" width="1280" height="720">
+        Your browser does not support the HTML5 canvas element.
+    </canvas>
+</div>
+<br>
+<div id="header">
+    <h1>Tp Sistemas gr&aacuteficos - Ali, Luis / Vidal, Mariano - 1er. cuatrimestre de 2016</h1>
+</div>
+<div id="ref">
+    <a href="#/" data-section="#camaras">Cambiar C&aacutemaras</a><br>
+    <a href="#/" data-section="#CamaraOrbital">C&aacutemara orbital</a><br>
+    <a href="#/" data-section="#CamaraPrimeraPersona">C&aacutemara primera persona</a><br>
+    <a href="#/" data-section="#Nave">Nave</a><br>
+    <a href="#/" data-section="#Estacion">Estaci&oacuten espacial</a>
+</div>
+<section id="camaras">
+    <h2>Cambiar C&aacutemaras</h2>
+    <dl>
+        <dt class="thick">C&aacutemara orbital</dt>
+        <dd class="italic">Tecla <b>1</b> <b style="color:blue;font-size:70%;">[2]</b>
+        <dd>
+        <dt class="thick">C&aacutemara de la persona que camina por la bah&iacutea de carga</dt>
+        <dd class="italic">Tecla <b>2</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
+        <dt class="thick">C&aacutemara de persecuci&oacuten de nave</dt>
+        <dd class="italic">Tecla <b>3</b> <b style="color:blue;font-size:70%;">[2]</b>
+        <dd>
+        <dt class="thick">C&aacutemara de la cabina de la nave</dt>
+        <dd class="italic">Tecla <b>4</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
+    </dl>
+</section>
+<section id="CamaraOrbital">
+    <h2>C&aacutemara orbital</h2>
+    <dl>
+        <dt class="thick">Zoom</dt>
+        <dd class="italic">Acercar/Alejar, Mover rueda del mouse <b>Arriba/Abajo</b> o con teclas <b>+/-</b>
+            respectivamente
+        <dd>
+        <dt class="thick">Rotar la escena</dt>
+        <dd class="italic">Mantener bot&oacuten izquierdo del mouse presionado y mover el mouse</dd>
+    </dl>
+</section>
+<section id="CamaraPrimeraPersona">
+    <h2>C&aacutemara de primera persona</h2>
+    <dl>
+        <dt class="thick">Desplazarse por la bah&iacutea de carga</dt>
+        <dd class="italic">Izquierda/Atr&aacutes/Derecha/Adelante, <b>a/s/d/w</b> respectivamente
+        <dd>
+        <dt class="thick">Girar vista</dt>
+        <dd class="italic">Mover el mouse manteniendo presionado el bot&oacuten izquierdo. La c&aacutemara mira al
+            puntero del mouse
+        </dd>
+    </dl>
+</section>
+<section id="Nave">
+    <h2>Nave</h2>
+    <dl>
+        <dt class="thick">Rotaci&oacuten de la nave</dt>
+        <dd class="italic">Izquierda/Abajo/Derecha/Arriba, <b>4/5/6/8</b> respectivamente <b
+                style="color:blue;font-size:70%;">[1]</b></dd>
+        <dt class="thick">Rotaci&oacuten de los brazos</dt>
+        <dd class="italic">Horario/Antihorario, <b>l/k</b> respectivamente</dd>
+        <dt class="thick">Rotaci&oacuten de las turbinas</dt>
+        <dd class="italic">Horario/Antihorario, <b>p/o</b> respectivamente</dd>
+        <dt class="thick">Aceleraci&oacuten</dt>
+        <dd class="italic">Aumentar/Disminuir, <b>2/1</b> respectivamente <b style="color:blue;font-size:70%;">[1]</b>
+        </dd>
+        <dt class="thick">Tren de aterrizaje</dt>
+        <dd class="italic">Abrir/Cerrar, <b> &#8592/&#8594</b> respectivamente <b
+                style="color:blue;font-size:70%;">[2]</b></dd>
+        <p></p>
+        <p><</p>
+    </dl>
+</section>
+<section id="Estacion">
+    <h2>Estaci&oacuten espacial</h2>
+    <dl>
+        <dt class="thick">Abrir/Cerrar paneles</dt>
+        <dd class="italic">Flechas <b>&#8593/&#8595</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
+    </dl>
+</section>
+<div id="footer">
+    <b>[1]</b> (teclado num&eacuterico)<br>
+    <b>[2]</b> (teclado com&uacuten)<br>
+    Las texturas son cortes&iacutea de <a href="http://maps.jpl.nasa.gov/">Jet Propulsion Laboratory</a>.
+</div>
+<script>
+    $("a").on("click", function () {
+        var id = $(this).data("section");
+        $("section:visible").fadeOut(function () {
+            $(id).fadeIn();
+        });
+    });
+    $("#TpSistemasGraficosCanvas").bind("wheel mousewheel", function (e) {
+        e.preventDefault()
+    });
+</script>
+
+</body>
+
+</html>

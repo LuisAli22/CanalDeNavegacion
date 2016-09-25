@@ -1,0 +1,102 @@
+#header {
+    color: white;
+    font-size: 0.575em;
+    background-color: black;
+    text-align: center;
+    width: 800px;
+    padding: 5px;
+}
+
+#ref {
+    line-height: 30px;
+    background-color: #eeeeee;
+    height: 300px;
+    width: 250px;
+    float: left;
+    padding: 5px;
+}
+
+#section {
+    width: 800px;
+    float: left;
+    padding: 10px;
+}
+
+#footer {
+    background-color: black;
+    color: white;
+    clear: both;
+    width: 800px;
+    padding: 5px;
+}
+
+a:link {
+    color: #c00
+}
+
+/* unvisited links */
+a:visited {
+    color: #0c0
+}
+
+/* visited links   */
+a:hover {
+    color: #00c
+}
+
+/* user hovers     */
+a:active {
+    color: #ccc
+}
+
+/* active links    */
+p {
+    font-size: 0.875em;
+    color: blue;
+}
+
+dt.normal {
+    font-weight: normal;
+}
+
+dt.thick {
+    font-weight: bold;
+}
+
+dd.italic {
+    font-style: italic;
+}
+
+dd.oblique {
+    font-style: oblique;
+}
+
+section {
+    display: none;
+}
+
+#camaras {
+    width: 800px;
+    height: 300px;
+    display: block;
+}
+
+#CamaraOrbital {
+    width: 800px;
+    height: 300px;
+}
+
+#CamaraPrimeraPersona {
+    width: 800px;
+    height: 300px;
+}
+
+#Nave {
+    width: 800px;
+    height: 300px;
+}
+
+#Estacion {
+    width: 800px;
+    height: 300px;
+}
