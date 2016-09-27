@@ -7,11 +7,16 @@
 
     <script type="text/javascript" src="js/gl-matrix.js"></script>
     <script type="text/javascript" src="js/webgl-utils.js"></script>
+    <script type="text/javascript" src="js/dat.gui.min.js"></script>
     <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
     <script type="text/javascript" src="js/Definitions/Definitions.js"></script>
     <script type="text/javascript" src="js/Shader/Compiler.js"></script>
     <script type="text/javascript" src="js/Shader/Linker.js"></script>
     <script type="text/javascript" src="js/ModelViewMatrixStack.js"></script>
+    <script type="text/javascript" src="js/GraphicContainer/RenderingContextFactory.js"></script>
+    <script type="text/javascript" src="js/GraphicContainer/WebGlRenderingContext.js"></script>
+    <script type="text/javascript" src="js/GraphicContainer/RiverMapContext.js"></script>
+    <script type="text/javascript" src="js/GraphicContainer/SceneContext.js"></script>
     <script type="text/javascript" src="js/GraphicContainer/GraphicContainer.js"></script>
     <script type="text/javascript" src="js/BasicShapeContainer/BasicShapeContainer.js"></script>
     <script type="text/javascript" src="js/Scene/Scene.js"></script>
@@ -87,9 +92,46 @@ void main() {
     </script>
 
     <script type="text/javascript">
+        var app = {
+            alturaMaxima: 10,
+            reiniciar: function () {
+                alert("apreto reiniciar");
+            },
+            detener: function () {
+                alert("apreto detener");
+            },
+            modo: "random",
+            ancho: 0,
+            umbral: 100
+
+        };
+        function createGUI() {
+            /*  this.guiContainer = document.getElementById("control");
+             if (!this.guiContainer) {
+             throw new Error("Can 't get control canvas");
+             }*/
+            var gui = new dat.GUI();
+            var f1 = gui.addFolder("Comandos");
+            f1.add(app, "reiniciar").name("Reiniciar");
+            f1.add(app, "detener").name("detener");
+            f1.open();
+
+            var f2 = gui.addFolder("Parametros generales");
+            f2.add(app, "alturaMaxima", 1.0, 60.0).name("altura maxima").step(1);
+            f2.add(app, "ancho", 4, 25).name("Ancho");
+
+            f2.add(app, "modo", ["random", "secuencial"]).name("modo");
+            var f3 = gui.addFolder("Parametros Especiales ");
+            f3.add(app, "umbral", 0.0, 1.0).name("umbral");
+            f1.open();
+            f2.open();
+            f3.open();
+            //this.guiContainer.appendChild(gui.domElement);
+        }
         function webGLStart() {
             try {
-                var scene = new Scene();
+                createGUI();
+                var scene = new Scene("scene", FRAGMENTSHADERID, VERTEXSHADERID);
                 scene.tick();
             } catch (e) {
                 alert(e.name + " " + e.message);
@@ -99,52 +141,46 @@ void main() {
 
 </head>
 <body onload="webGLStart();">
-<div style="text-align: center;">
-    <canvas id="TpSistemasGraficosCanvas" style="border: none;" width="1280" height="720">
+<div style="text-align: right;">
+    <canvas id="scene" style="border: double transparent;" width="1024" height="720">
+        Your browser does not support the HTML5 canvas element.
+    </canvas>
+    <canvas id="riverMap" style="border: solid#696969;" width="360" height="360">
         Your browser does not support the HTML5 canvas element.
     </canvas>
 </div>
 <br>
 <div id="header">
-    <h1>Tp Sistemas gr&aacuteficos - Ali, Luis / Vidal, Mariano - 1er. cuatrimestre de 2016</h1>
+    <h1>Tp Sistemas gr&aacuteficos - Ali, Luis - 2do. cuatrimestre de 2016</h1>
 </div>
 <div id="ref">
     <a href="#/" data-section="#camaras">Cambiar C&aacutemaras</a><br>
     <a href="#/" data-section="#CamaraOrbital">C&aacutemara orbital</a><br>
-    <a href="#/" data-section="#CamaraPrimeraPersona">C&aacutemara primera persona</a><br>
-    <a href="#/" data-section="#Nave">Nave</a><br>
-    <a href="#/" data-section="#Estacion">Estaci&oacuten espacial</a>
+    <a href="#/" data-section="#CamaraPrimeraPersona">C&aacutemara primera persona</a>
 </div>
 <section id="camaras">
-    <h2>Cambiar C&aacutemaras</h2>
+    <h2>Alternar C&aacutemaras</h2>
     <dl>
-        <dt class="thick">C&aacutemara orbital</dt>
-        <dd class="italic">Tecla <b>1</b> <b style="color:blue;font-size:70%;">[2]</b>
-        <dd>
-        <dt class="thick">C&aacutemara de la persona que camina por la bah&iacutea de carga</dt>
-        <dd class="italic">Tecla <b>2</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
-        <dt class="thick">C&aacutemara de persecuci&oacuten de nave</dt>
-        <dd class="italic">Tecla <b>3</b> <b style="color:blue;font-size:70%;">[2]</b>
-        <dd>
-        <dt class="thick">C&aacutemara de la cabina de la nave</dt>
-        <dd class="italic">Tecla <b>4</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
+        <dt class="thick"><b style="color:blue;">Aletrna en el &oacuterden Orbital / Persona en el puente / Persona en
+            el barco</b></dt>
+        <dd class="italic">Tecla <b>C</b></dd>
     </dl>
 </section>
 <section id="CamaraOrbital">
     <h2>C&aacutemara orbital</h2>
     <dl>
         <dt class="thick">Zoom</dt>
-        <dd class="italic">Acercar/Alejar, Mover rueda del mouse <b>Arriba/Abajo</b> o con teclas <b>+/-</b>
-            respectivamente
+        <dd class="italic">Acercar/Alejar, Mover rueda del mouse <b>Arriba/Abajo</b>
         <dd>
         <dt class="thick">Rotar la escena</dt>
         <dd class="italic">Mantener bot&oacuten izquierdo del mouse presionado y mover el mouse</dd>
     </dl>
 </section>
 <section id="CamaraPrimeraPersona">
-    <h2>C&aacutemara de primera persona</h2>
+    <h2>C&aacutemara de primera persona <b style="color:blue;font-size:70%;">(tanto en el puente como en el barco)</b>
+    </h2>
     <dl>
-        <dt class="thick">Desplazarse por la bah&iacutea de carga</dt>
+        <dt class="thick">Desplazarse</dt>
         <dd class="italic">Izquierda/Atr&aacutes/Derecha/Adelante, <b>a/s/d/w</b> respectivamente
         <dd>
         <dt class="thick">Girar vista</dt>
@@ -153,36 +189,8 @@ void main() {
         </dd>
     </dl>
 </section>
-<section id="Nave">
-    <h2>Nave</h2>
-    <dl>
-        <dt class="thick">Rotaci&oacuten de la nave</dt>
-        <dd class="italic">Izquierda/Abajo/Derecha/Arriba, <b>4/5/6/8</b> respectivamente <b
-                style="color:blue;font-size:70%;">[1]</b></dd>
-        <dt class="thick">Rotaci&oacuten de los brazos</dt>
-        <dd class="italic">Horario/Antihorario, <b>l/k</b> respectivamente</dd>
-        <dt class="thick">Rotaci&oacuten de las turbinas</dt>
-        <dd class="italic">Horario/Antihorario, <b>p/o</b> respectivamente</dd>
-        <dt class="thick">Aceleraci&oacuten</dt>
-        <dd class="italic">Aumentar/Disminuir, <b>2/1</b> respectivamente <b style="color:blue;font-size:70%;">[1]</b>
-        </dd>
-        <dt class="thick">Tren de aterrizaje</dt>
-        <dd class="italic">Abrir/Cerrar, <b> &#8592/&#8594</b> respectivamente <b
-                style="color:blue;font-size:70%;">[2]</b></dd>
-        <p></p>
-        <p><</p>
-    </dl>
-</section>
-<section id="Estacion">
-    <h2>Estaci&oacuten espacial</h2>
-    <dl>
-        <dt class="thick">Abrir/Cerrar paneles</dt>
-        <dd class="italic">Flechas <b>&#8593/&#8595</b> <b style="color:blue;font-size:70%;">[2]</b></dd>
-    </dl>
 </section>
 <div id="footer">
-    <b>[1]</b> (teclado num&eacuterico)<br>
-    <b>[2]</b> (teclado com&uacuten)<br>
     Las texturas son cortes&iacutea de <a href="http://maps.jpl.nasa.gov/">Jet Propulsion Laboratory</a>.
 </div>
 <script>
@@ -192,7 +200,7 @@ void main() {
             $(id).fadeIn();
         });
     });
-    $("#TpSistemasGraficosCanvas").bind("wheel mousewheel", function (e) {
+    $("#scene").bind("wheel mousewheel", function (e) {
         e.preventDefault()
     });
 </script>

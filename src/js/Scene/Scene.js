@@ -1,26 +1,21 @@
 /*jslint browser: true*/
 /*global GraphicContainer, Cylinder,Orbital, Camera, mat4,requestAnimFrame*/
-/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, BasicShapeContainer*/
+/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, BasicShapeContainer, FRAGMENTSHADERID, VERTEXSHADERID*/
 var Scene;
 (function () {
     "use strict";
-    Scene = function () {
+    Scene = function (canvasID, fragmentShaderIdentifier, vertexShaderIdentifier) {
         this.mvStack = new ModelViewMatrixStack();
-        this.graphicContainer = new GraphicContainer();
+        this.graphicContainer = new GraphicContainer(canvasID, fragmentShaderIdentifier, vertexShaderIdentifier);
         this.basicShapeContainer = new BasicShapeContainer(this.graphicContainer);
         this.camera = new Orbital(this.graphicContainer);
         this.projectionMatrix = mat4.create();
         this.verticalViewField = Math.PI / 12.0;
         this.aspectRatio = this.graphicContainer.getAspectRatio();
-        this.shaderProgram = this.graphicContainer.getShaderProgram();
-        this.graphicContainer.contextColorBlack();
+        this.graphicContainer.contextColor();
         this.graphicContainer.contextEnableDepthTest();
         this.modelViewMatrix = mat4.create();
-        this.canvas = this.graphicContainer.getCanvas();
-        this.canvas.onmousedown = this.onMouseDown.bind(this);
-        this.canvas.onmouseup = this.onMouseUp.bind(this);
-        this.canvas.onmousemove = this.onMouseMove.bind(this);
-        this.canvas.onwheel = this.onWheel.bind(this);
+        this.graphicContainer.bindEventFunctions(this);
     };
     Scene.prototype.onMouseDown = function (event) {
         this.camera.onMouseDown(event);
@@ -40,12 +35,16 @@ var Scene;
     };
     Scene.prototype.configureProjectionMatrix = function () {
         mat4.perspective(this.projectionMatrix, this.verticalViewField, this.aspectRatio, FRUSTUMNEAR, FRUSTUMFAR);
-        this.graphicContainer.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.projectionMatrix);
+        this.graphicContainer.setProjectionMatrixToShaderProgram(this.projectionMatrix);
     };
     Scene.prototype.draw = function () {
         this.graphicContainer.setViewPort();
         this.graphicContainer.clearBuffer();
         this.configureProjectionMatrix();
         this.graphicContainer.configureLighting();
+        this.mvStack.push(this.modelViewMatrix);
+        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(0, 10, 10));
+        this.basicShapeContainer.cylinder.draw(this.modelViewMatrix);
+        mat4.copy(this.modelViewMatrix, this.mvStack.pop());
     };
 }());

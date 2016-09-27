@@ -1,5 +1,5 @@
 /*jslint browser: true*/
-/*global CYLINDERFINALHEIGHT, XCOORD, YCOORD, RoundBody*/
+/*global CYLINDERFINALHEIGHT, XCOORD, YCOORD, RoundBody, RUTAIMAGENMARTE*/
 var Cylinder;
 (function () {
     "use strict";
@@ -22,8 +22,8 @@ var Cylinder;
         return this.currentHeight;
     };
     Cylinder.prototype.loadLidPositionAndNormalBuffer = function (value) {
-        this.normal_buffer.push(value);
-        this.position_buffer.push(value);
+        this.bufferList.normal.push(value);
+        this.bufferList.position.push(value);
     };
     Cylinder.prototype.loadLidCentralPoint = function (lidHeight) {
         var indexCoordinate = [0, 1, 2];

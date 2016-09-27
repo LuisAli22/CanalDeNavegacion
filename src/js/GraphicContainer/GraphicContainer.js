@@ -1,66 +1,72 @@
 /*jslint browser: true*/
-/*global CANVASERRORMESSAGE, CANVASCONTEXTERROR,FRAGMENTSHADERID,VERTEXSHADERID, Linker,Compiler, vec3*/
+/*global CANVASERRORMESSAGE, RenderingContextFactory, SceneContext, RiverMapContext, vec2*/
 var GraphicContainer;
 (function () {
     "use strict";
-    GraphicContainer = function () {
-        this.canvas = document.getElementById("TpSistemasGraficosCanvas");
+    GraphicContainer = function (canvasID, fragmentShaderIdentifier, vertexShaderIdentifier) {
+        this.canvas = document.getElementById(canvasID);
         if (!this.canvas) {
             throw new Error(CANVASERRORMESSAGE);
         }
-        this.gl = this.canvas.getContext("experimental-webgl");
-        if (!this.gl) {
-            throw new Error(CANVASCONTEXTERROR);
-        }
-        this.gl.viewportWidth = this.canvas.width;
-        this.gl.viewportHeight = this.canvas.height;
-        this.shaderProgram = this.gl.createProgram();
-        this.compileAndLinkShaders();
+        this.renderingContextFactory = new RenderingContextFactory();
+        this.renderingContextFactory.registerRenderingContext("scene", SceneContext);
+        this.renderingContextFactory.registerRenderingContext("riverMap", RiverMapContext);
+        this.gl = this.renderingContextFactory.getRenderingContext(canvasID, this.canvas, fragmentShaderIdentifier, vertexShaderIdentifier);
     };
-    GraphicContainer.prototype.contextColorBlack = function () {
-        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    GraphicContainer.prototype.getContext = function () {
+        return this.gl.getContext();
     };
     GraphicContainer.prototype.contextEnableDepthTest = function () {
-        this.gl.enable(this.gl.DEPTH_TEST);
-    };
-    GraphicContainer.prototype.configureLighting = function () {
-        var lighting = 1;
-        this.gl.uniform1i(this.shaderProgram.useLightingUniform, lighting);
-        var lightPosition = vec3.fromValues(-100.0, 0.0, -60.0);
-        this.gl.uniform3fv(this.shaderProgram.lightingDirectionUniform, lightPosition);
-
-        this.gl.uniform3f(this.shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
-        this.gl.uniform3f(this.shaderProgram.directionalColorUniform, 0.05, 0.05, 0.05);
-    };
-    GraphicContainer.prototype.getCompiledShader = function (shaderIdentifier, shaderType) {
-        var compiler = new Compiler(shaderIdentifier, shaderType, this.gl);
-        return compiler.start();
-    };
-    GraphicContainer.prototype.compileAndLinkShaders = function () {
-        var fragmentShader = this.getCompiledShader(FRAGMENTSHADERID, this.gl.FRAGMENT_SHADER);
-        var vertexShader = this.getCompiledShader(VERTEXSHADERID, this.gl.VERTEX_SHADER);
-        var linker = new Linker(vertexShader, fragmentShader, this.shaderProgram, this.gl);
-        linker.start();
+        this.gl.contextEnableDepthTest();
     };
     GraphicContainer.prototype.setViewPort = function () {
-        this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
+        this.gl.setViewPort();
     };
     GraphicContainer.prototype.clearBuffer = function () {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.clearBuffer();
     };
     GraphicContainer.prototype.getAspectRatio = function () {
-        return (this.gl.viewportWidth / this.gl.viewportHeight);
-    };
-    GraphicContainer.prototype.getShaderProgram = function () {
-        return this.shaderProgram;
+        return this.gl.getAspectRatio();
     };
     GraphicContainer.prototype.uniformMatrix4fv = function (location, transpose, value) {
         this.gl.uniformMatrix4fv(location, transpose, value);
     };
-    GraphicContainer.prototype.getContext = function () {
-        return this.gl;
+    GraphicContainer.prototype.createDataStore = function (bufferList) {
+        this.gl.createDataStore(bufferList);
     };
-    GraphicContainer.prototype.getCanvas = function () {
-        return this.canvas;
+    GraphicContainer.prototype.defineGenericVertexAtributeArray = function (bufferList) {
+        this.gl.defineGenericVertexAtributeArray(bufferList);
+    };
+    GraphicContainer.prototype.setTextureModelViewMatrixNormalMatrixTAndDraw = function (modelViewMatrix, texture, indexBuffer) {
+        this.gl.setTextureModelViewMatrixNormalMatrixTAndDraw(modelViewMatrix, texture, indexBuffer);
+    };
+    GraphicContainer.prototype.setViewMatrixToShaderProgram = function (lookAtMatrix) {
+        this.gl.setViewMatrixToShaderProgram(lookAtMatrix);
+    };
+    GraphicContainer.prototype.setProjectionMatrixToShaderProgram = function (projectionMatrix) {
+        this.gl.setProjectionMatrixToShaderProgram(projectionMatrix);
+    };
+    GraphicContainer.prototype.getCanvasOffset = function () {
+        return this.gl.getCanvasOffset();
+    };
+    GraphicContainer.prototype.contextColor = function () {
+        this.gl.contextColor();
+    };
+    GraphicContainer.prototype.getCanvasOffset = function () {
+        var offset = vec2.create();
+        vec2.set(offset, this.canvas.offsetLeft, this.canvas.offsetTop);
+        return offset;
+    };
+    GraphicContainer.prototype.bindEventFunctions = function (geographicView) {
+        this.canvas.onmousedown = geographicView.onMouseDown.bind(geographicView);
+        this.canvas.onmouseup = geographicView.onMouseUp.bind(geographicView);
+        this.canvas.onmousemove = geographicView.onMouseMove.bind(geographicView);
+        this.canvas.onwheel = geographicView.onWheel.bind(geographicView);
+    };
+    GraphicContainer.prototype.configureLighting = function () {
+        this.gl.configureLighting();
+    };
+    GraphicContainer.prototype.initializeTexture = function () {
+        this.gl.initializeTexture();
     };
 }());
