@@ -2,7 +2,7 @@
  * Created by LuisAli22 on 26/09/16.
  */
 /*jslint browser: true*/
-/*global CANVASCONTEXTERROR, vec3, Compiler, Linker, Float32Array, Uint16Array, mat3, RUTAIMAGENMARTE*/
+/*global CANVASCONTEXTERROR, vec3, Compiler, Linker, Float32Array, Uint16Array, mat3, handleTexture*/
 var WebGlRenderingContext;
 (function () {
     "use strict";
@@ -81,43 +81,26 @@ var WebGlRenderingContext;
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
     };
-    WebGlRenderingContext.prototype.setTextureModelViewMatrixNormalMatrixTAndDraw = function (modelViewMatrix, texture) {
-        this.gl.uniformMatrix4fv(this.shaderProgram.ModelMatrixUniform, false, modelViewMatrix);
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
-        var normalMatrix = mat3.create();
-        mat3.fromMat4(normalMatrix, modelViewMatrix);
-        mat3.invert(normalMatrix, normalMatrix);
-        mat3.transpose(normalMatrix, normalMatrix);
-        this.gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-        this.gl.drawElements(this.gl.TRIANGLE_STRIP, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
-    };
     WebGlRenderingContext.prototype.setViewMatrixToShaderProgram = function (lookAtMatrix) {
         this.gl.uniformMatrix4fv(this.shaderProgram.ViewMatrixUniform, false, lookAtMatrix);
     };
     WebGlRenderingContext.prototype.setProjectionMatrixToShaderProgram = function (projectionMatrix) {
         this.gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, projectionMatrix);
     };
-    WebGlRenderingContext.prototype.initializeTexture = function () {
-        var aux_texture = this.gl.createTexture();
-        var currentGraphicalObject = this;
-        this.texture = aux_texture;
-        this.texture.image = new Image();
-        this.texture.image.onload = function () {
-            currentGraphicalObject.generateMipMap();
-        };
-        this.texture.image.src = RUTAIMAGENMARTE;
+    WebGlRenderingContext.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
+        this.gl.uniformMatrix4fv(this.shaderProgram.ModelMatrixUniform, false, modelViewMatrix);
+        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+        var normalMatrix = mat3.create();
+        mat3.fromMat4(normalMatrix, modelViewMatrix);
+        mat3.invert(normalMatrix, normalMatrix);
+        mat3.transpose(normalMatrix, normalMatrix);
+        this.gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
     };
-    WebGlRenderingContext.prototype.generateMipMap = function () {
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.texture.image);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    WebGlRenderingContext.prototype.draw = function () {
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
+        this.gl.drawElements(this.gl.TRIANGLE_STRIP, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+    };
+    WebGlRenderingContext.prototype.getContext = function () {
+        return this.gl;
     };
 }());

@@ -46,6 +46,9 @@ var GraphicContainer;
     GraphicContainer.prototype.setProjectionMatrixToShaderProgram = function (projectionMatrix) {
         this.gl.setProjectionMatrixToShaderProgram(projectionMatrix);
     };
+    GraphicContainer.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
+        this.gl.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
+    };
     GraphicContainer.prototype.getCanvasOffset = function () {
         return this.gl.getCanvasOffset();
     };
@@ -66,7 +69,7 @@ var GraphicContainer;
     GraphicContainer.prototype.configureLighting = function () {
         this.gl.configureLighting();
     };
-    GraphicContainer.prototype.initializeTexture = function () {
-        this.gl.initializeTexture();
+    GraphicContainer.prototype.draw = function () {
+        this.gl.draw();
     };
 }());

@@ -7,7 +7,6 @@ var Cylinder;
         RoundBody.call(this, graphicContainer);
         this.currentHeight = 0;
         this.setUpBuffers();
-        this.initializeTexture();
     };
     Cylinder.prototype = Object.create(RoundBody.prototype);
     Cylinder.prototype.constructor = Cylinder;

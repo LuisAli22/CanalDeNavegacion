@@ -29,7 +29,7 @@ var Camera;
         var canvasOffset = this.graphicContainer.getCanvasOffset();
         var screenCoordinate = vec2.create();
         vec2.set(screenCoordinate, event.clientX, event.clientY);
-        screenCoordinate -= canvasOffset;
+        vec2.subtract(screenCoordinate, screenCoordinate, canvasOffset);
         return screenCoordinate;
     };
     Camera.prototype.onMouseDown = function (event) {
