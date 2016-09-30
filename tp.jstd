@@ -8,7 +8,7 @@ load:
   - src/js/GraphicalObject/Sphere.js
   - src/js/GraphicalObject/Cylinder.js
   - src/js/GraphicContainer/GraphicContainer.js
-  - src/js/Scene/Scene.js
+  - src/js/AnimationFrame/AnimationFrame.js
   - src/js/Shader/Compiler.js
   - src/js/Shader/Linker.js
   - src/js/ModelViewMatrixStack.js

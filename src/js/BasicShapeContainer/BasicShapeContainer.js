@@ -3,7 +3,7 @@
 var BasicShapeContainer;
 (function () {
     "use strict";
-    BasicShapeContainer = function (graphicContainer) {
-        this.cylinder = new Cylinder(graphicContainer);
+    BasicShapeContainer = function (sceneGraphicContainer) {
+        this.cylinder = new Cylinder(sceneGraphicContainer);
     };
 }());

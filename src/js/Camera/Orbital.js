@@ -4,8 +4,8 @@
 var Orbital;
 (function () {
     "use strict";
-    Orbital = function (graphicContainer) {
-        Camera.call(this, graphicContainer);
+    Orbital = function (sceneGraphicContainer) {
+        Camera.call(this, sceneGraphicContainer);
         this.radius = 85;
         this.theta = 0.5 * Math.PI;
         this.phi = 0.5 * Math.PI;
@@ -43,12 +43,6 @@ var Orbital;
     };
     Orbital.prototype.onWheel = function (event) {
         this.updateRadius(event.deltaY);
-    };
-    Orbital.prototype.zoomIn = function () {
-        this.updateRadius(ZOOMINSTEP);
-    };
-    Orbital.prototype.zoomOut = function () {
-        this.updateRadius(ZOOMOUTSTEP);
     };
     Orbital.prototype.setViewDirection = function () {
         var x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);

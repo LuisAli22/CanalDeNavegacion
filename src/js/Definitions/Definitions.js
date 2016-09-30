@@ -1,4 +1,5 @@
 /*jshint esversion: 6 */
+/*global vec4*/
 const CANVASCONTEXTERROR = "Error al obteniendo el contexto del canvas. No se puede inicializar WebGL.";
 const CANVASERRORMESSAGE = "Error obteniendo el canvas (por id)";
 const MENSAJEERRORSHADER = "Error obeniendo el shader (por id)";
@@ -159,3 +160,26 @@ const DESPLAZAMIENTORADIALPAREDINTERIOR = 1.7;
 const ZOOMINSTEP = -1;
 const ZOOMOUTSTEP = -ZOOMINSTEP;
 const INTENSIDADLUZSOLAR = 20.0;
+
+function createMatrixFromValues(matrix, values) {
+    "use strict";
+    values.forEach(function (element, index) {
+        matrix[index] = element;
+    });
+}
+function multiplyMatrixByVector(matrix, vector) {
+    "use strict";
+    var product = vec4.create();
+    var addition = 0;
+    matrix.forEach(function (element, index, matrix) {
+        if (((index % 4) === 0) && (index !== 0)) {
+            product[Math.floor((index - 1) / 4)] = addition;
+            addition = 0;
+        }
+        addition += matrix[index] * vector [index % 4];
+        if (index === matrix.length - 1) {
+            product[Math.floor((index) / 4)] = addition;
+        }
+    });
+    return product;
+}

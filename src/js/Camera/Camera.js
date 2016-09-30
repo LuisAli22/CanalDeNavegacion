@@ -3,8 +3,8 @@
 var Camera;
 (function () {
     "use strict";
-    Camera = function (graphicContainer) {
-        this.graphicContainer = graphicContainer;
+    Camera = function (sceneGraphicContainer) {
+        this.sceneGraphicContainer = sceneGraphicContainer;
         this.eye = vec3.create();
         vec3.set(this.eye, 0, 0, 0);
         this.target = vec3.create();
@@ -20,13 +20,13 @@ var Camera;
         mat4.identity(this.lookAtMatrix);
         this.setViewDirection();
         mat4.lookAt(this.lookAtMatrix, this.eye, this.target, this.up);
-        this.graphicContainer.setViewMatrixToShaderProgram(this.lookAtMatrix);
+        this.sceneGraphicContainer.setViewMatrixToShaderProgram(this.lookAtMatrix);
     };
     Camera.prototype.isLeftButton = function (event) {
         return (event.which === BOTONIZQUIERDODELMOUSE);
     };
     Camera.prototype.getScreenCoordinate = function (event) {
-        var canvasOffset = this.graphicContainer.getCanvasOffset();
+        var canvasOffset = this.sceneGraphicContainer.getCanvasOffset();
         var screenCoordinate = vec2.create();
         vec2.set(screenCoordinate, event.clientX, event.clientY);
         vec2.subtract(screenCoordinate, screenCoordinate, canvasOffset);
