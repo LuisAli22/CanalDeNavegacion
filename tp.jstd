@@ -1,5 +1,5 @@
 load:
-  - src/js/BasicShapeContainer/BasicShapeContainer.js
+  - src/js/BasicShapeContainer/ThreeDimensionShapeContainer.js
   - src/js/Camera/Camera.js
   - src/js/Camera/Orbital.js
   - src/js/Definitions/Definitions.js

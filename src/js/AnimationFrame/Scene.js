@@ -1,13 +1,13 @@
 /*jslint browser: true*/
 /*global SceneGraphicContainer, Cylinder,Orbital, Camera, mat4,AnimationFrame*/
-/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, BasicShapeContainer, RUTAIMAGENMARTE*/
+/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, ThreeDimensionShapeContainer, RUTAIMAGENMARTE*/
 var Scene;
 (function () {
     "use strict";
     Scene = function () {
         AnimationFrame.call(this);
         this.sceneGraphicContainer = new SceneGraphicContainer();
-        this.basicShapeContainer = new BasicShapeContainer(this.sceneGraphicContainer);
+        this.basicShapeContainer = new ThreeDimensionShapeContainer(this.sceneGraphicContainer);
         this.basicShapeContainer.cylinder.initializeTexture(RUTAIMAGENMARTE);
         this.camera = new Orbital(this.sceneGraphicContainer);
         this.projectionMatrix = mat4.create();

@@ -1,10 +1,10 @@
-/*global CANVASERRORMESSAGE, WebGlRenderingContext, FRAGMENTSHADERID, VERTEXSHADERID, vec2, GraphicContainer*/
+/*global CANVASERRORMESSAGE, ThreeDimensionRenderingContext, FRAGMENTSHADERID, VERTEXSHADERID, vec2, GraphicContainer*/
 var SceneGraphicContainer;
 (function () {
     "use strict";
     SceneGraphicContainer = function () {
         GraphicContainer.call(this, "scene");
-        this.gl = new WebGlRenderingContext(this.canvas, FRAGMENTSHADERID, VERTEXSHADERID);
+        this.gl = new ThreeDimensionRenderingContext(this.canvas, FRAGMENTSHADERID, VERTEXSHADERID);
     };
     SceneGraphicContainer.prototype = Object.create(GraphicContainer.prototype);
     SceneGraphicContainer.constructor = SceneGraphicContainer;

@@ -1,22 +1,62 @@
-/*global RiverMapGraphicContainer, AnimationFrame, vec4, vec2, Bspline*/
+/*global RiverMapGraphicContainer, AnimationFrame, vec4, vec2, Bspline, TwoDimensionShapeContainer*/
 var RiverMap;
 (function () {
     "use strict";
     RiverMap = function () {
-        this.canvas = document.getElementById("riverMap");
-        this.gl = this.canvas.getContext("2d");
-        this.xControlPoints = vec4.create();
-        this.yControlPoints = vec4.create();
-        vec4.set(this.xControlPoints, 100, 200, 600, 700);
-        vec4.set(this.yControlPoints, 450, 100, 100, 450);
-        //this.riverMapGraphicContainer = new RiverMapGraphicContainer();
-        this.currentU = 0;
-        //this.riverMapGraphicContainer.bindEventFunctions(this);
-        this.bSpline = new Bspline(this.xControlPoints, this.yControlPoints);
+        AnimationFrame.call(this);
+        this.riverMapGraphicContainer = new RiverMapGraphicContainer();
+        this.shapeContainer = new TwoDimensionShapeContainer(this.riverMapGraphicContainer);
+        this.bSplineCurve = this.shapeContainer.bSplineCurve;
         this.mouseIsPressed = false;
+        //this.index = [0, 0, 0, 1, 2, 3, 3, 3];
+        this.canvas = this.riverMapGraphicContainer.getCanvas();
+        this.controlSegmentAmount = 5;
+        //this.position = [];
+        //this.createPositions();
+        //this.position = [this.canvas.width / 2, 0, this.canvas.width / 4, this.canvas.height / 12, this.canvas.width / 4, this.canvas.height / 6, this.canvas.width / 2, this.canvas.height / 4];
     };
     RiverMap.prototype = Object.create(AnimationFrame.prototype);
     RiverMap.constructor = RiverMap;
+    RiverMap.prototype.isOdd = function (number) {
+        return ((number % 2 !== 0) && (number !== 0));
+    };
+    RiverMap.prototype.getIndex = function (position) {
+        if (position < 2) {
+            return 0;
+        }
+        if ((position - 2) < (4 * this.controlSegmentAmount)) {
+            return (position - 2);
+        }
+        return ((4 * this.controlSegmentAmount) - 1);
+    };
+    RiverMap.prototype.isOddAndIsAtDistanceTwoFromNearestMultipleOfThree = function (index) {
+        return ((this.isOdd(index)) && (((index - 2) % 3) === 0));
+    };
+    RiverMap.prototype.isEvenAndIsNotAtDistanceTwoFromNearestMultipleOfThree = function (index) {
+        return (!this.isOdd(index)) && (((index - 2) % 3) !== 0);
+    };
+    RiverMap.prototype.isAtThreeQuarterWidth = function (index) {
+        return (this.isOddAndIsAtDistanceTwoFromNearestMultipleOfThree(index) || (this.isEvenAndIsNotAtDistanceTwoFromNearestMultipleOfThree(index)));
+    };
+    RiverMap.prototype.getXPositionValue = function (index) {
+        if (index % 3 === 0) {
+            return this.canvas.width / 2;
+        }
+        if (this.isAtThreeQuarterWidth(index)) {
+            return ((5 * this.canvas.width) / 8);
+        }
+        return (3 * this.canvas.width / 8);
+    };
+    RiverMap.prototype.getYPositionValue = function (index) {
+        var horizontalDivisionStep = 1 / (this.controlSegmentAmount * 3);
+        return (index * this.canvas.height * horizontalDivisionStep);
+    };
+    /*RiverMap.prototype.createPositions = function () {
+     var index;
+     for (index = 0; index < 8; index += 1) {
+     this.position[index] = this.getPositionValue(index);
+     }
+     };*/
     RiverMap.prototype.updateCoordinates = function (e) {
         //var pos=$("#riverMap").position();
         //$("#pad").html("mouse x: " + (e.pageX -pos.left)+ "<br>mouse y: " + (e.pageY-pos.top));
@@ -25,7 +65,7 @@ var RiverMap;
         this.mouseIsPressed = true;
         this.updateCoordinates(event);
     };
-    RiverMap.prototype.onMouseUp = function (event) {
+    RiverMap.prototype.onMouseUp = function () {
         this.mouseIsPressed = false;
     };
     RiverMap.prototype.onMouseMove = function (event) {
@@ -33,83 +73,40 @@ var RiverMap;
             this.updateCoordinates(event);
         }
     };
-    RiverMap.prototype.cubicCurve = function (u) {
-        return this.bSpline.base(u);
+    /*    RiverMap.prototype.cubicCurve = function (u) {
+     return this.bSplineCurve.base(u);
     };
     RiverMap.prototype.firstDerivateCubicCurve = function () {
-        return this.bSpline.derivatedBase(this.currentU);
+     return this.bSplineCurve.derivatedBase(this.currentU);
+     };*/
+    RiverMap.prototype.createCurveIdentifiers = function () {
+        var identifiers = [];
+        var index;
+        for (index = 0; index <= this.controlSegmentAmount * 4; index += 1) {
+            identifiers[index] = index;
+        }
+        return identifiers;
     };
     RiverMap.prototype.draw = function () {
-        this.drawCubicCurve(true);
-
-        var punto = this.cubicCurve(this.currentU);
-        this.currentU += 0.002;
-        this.gl.lineWidth = 5;
-        this.gl.beginPath();
-        this.gl.arc(punto.x, punto.y, 10, 0, 2 * Math.PI);
-        this.gl.strokeStyle = "#00FF00";
-        this.gl.stroke();
-
-        var der = this.firstDerivateCubicCurve();
-
-        var modulo = Math.sqrt(der.x * der.x + der.y * der.y);
-        der.x = der.x * 50 / modulo;
-        der.y = der.y * 50 / modulo;
-        this.dibujarVector(punto.x, punto.y, der.x, der.y, "#FF00FF");
-
-
-        var normal = {
-            "x": -der.y,
-            "y": der.x
-        };
-        this.dibujarVector(punto.x, punto.y, normal.x, normal.y, "#00FFFF");
-        if (this.currentU > 1) {
-            this.currentU = 0;
-        }
+        this.riverMapGraphicContainer.clearRect();
+        var curveBsplineIdentifiers = this.createCurveIdentifiers();//[0, 1, 2, 3, 4];
+        var riverMap = this;
+        curveBsplineIdentifiers.forEach(function (curveIdentifier) {
+            var slidingWindow = vec4.create();
+            vec4.set(slidingWindow, riverMap.getIndex(curveIdentifier), riverMap.getIndex(curveIdentifier + 1), riverMap.getIndex(curveIdentifier + 2), riverMap.getIndex(curveIdentifier + 3));
+            var xControlPoints = vec4.create();
+            var yControlPoints = vec4.create();
+            slidingWindow.forEach(function (element, index) {
+                //var positionIndex = 2 * element;
+                xControlPoints[index] = riverMap.getXPositionValue(element);//riverMap.position[positionIndex];
+                yControlPoints[index] = riverMap.getYPositionValue(element);//riverMap.position[positionIndex + 1];
+            });
+            riverMap.bSplineCurve.setControlPoints(xControlPoints, yControlPoints);
+            riverMap.bSplineCurve.draw();
+            /*if (curveIdentifier === 2) {
+             riverMap.bSplineCurve.drawControlGraph();
+             }*/
+        });
     };
-    RiverMap.prototype.drawCubicCurve = function (dibujarGrafo) {
-        /*        var p0 = this.puntosDeControl[0];
-         var p1 = this.puntosDeControl[1];
-         var p2 = this.puntosDeControl[2];
-         var p3 = this.puntosDeControl[3];*/
 
-        this.gl.lineWidth = 2;
-        // Dibujamos la curva en color azul, entre u=0 y u=1 con deltaU
-
-        var deltaU = 0.01; // es el paso de avance sobre la curva cuanto mas chico mayor es el detalle
-        // u=0.05 son 20 segmentos (0.05=1/20)
-        this.gl.clearRect(0, 0, 1000, 1000);
-        this.gl.beginPath();
-        var u;
-        var punto;
-        for (u = 0; u <= 1.001; u = u + deltaU) {
-            // Tengo que calcular la posicion del punto c(u)
-            punto = this.cubicCurve(u);
-
-            if (u === 0) {
-                this.gl.moveTo(punto.x, punto.y);
-            }
-            this.gl.lineTo(punto.x, punto.y);// hago una linea desde el ultimo lineTo hasta x,y
-            //console.log("C("+u+")= "+punto.x+","+punto.y);
-        }
-        this.gl.strokeStyle = "#0000FF";
-        this.gl.stroke();
-        // Dibujo el grafo de control en color rojo, solo para verificar donde esta cada punto de control
-        if (dibujarGrafo) {
-            this.gl.beginPath();
-            this.gl.moveTo(this.xControlPoints[0], this.yControlPoints[0]);
-            this.gl.lineTo(this.xControlPoints[1], this.yControlPoints[1]);
-            this.gl.lineTo(this.xControlPoints[2], this.yControlPoints[2]);
-            this.gl.lineTo(this.xControlPoints[3], this.yControlPoints[3]);
-            this.gl.strokeStyle = "#FF0000";
-            this.gl.stroke();
-        }
-    };
-    RiverMap.prototype.dibujarVector = function (x1, y1, x2, y2, color) {
-        this.gl.beginPath();
-        this.gl.moveTo(x1, y1);
-        this.gl.lineTo(x1 + x2, y1 + y2);
-        this.gl.strokeStyle = color;
-        this.gl.stroke();
-    };
 }());
