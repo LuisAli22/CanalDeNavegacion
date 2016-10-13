@@ -6,7 +6,7 @@ var Scene;
     "use strict";
     Scene = function () {
         AnimationFrame.call(this);
-        this.sceneGraphicContainer = new SceneGraphicContainer();
+        this.sceneGraphicContainer = new SceneGraphicContainer(this);
         this.basicShapeContainer = new ThreeDimensionShapeContainer(this.sceneGraphicContainer);
         this.basicShapeContainer.cylinder.initializeTexture(RUTAIMAGENMARTE);
         this.camera = new Orbital(this.sceneGraphicContainer);
@@ -16,18 +16,11 @@ var Scene;
         this.sceneGraphicContainer.contextColor();
         this.sceneGraphicContainer.contextEnableDepthTest();
         this.modelViewMatrix = mat4.create();
-        this.sceneGraphicContainer.bindEventFunctions(this);
     };
     Scene.prototype = Object.create(AnimationFrame.prototype);
     Scene.prototype.constructor = Scene;
-    Scene.prototype.onMouseDown = function (event) {
-        this.camera.onMouseDown(event);
-    };
-    Scene.prototype.onMouseUp = function (event) {
-        this.camera.onMouseUp(event);
-    };
-    Scene.prototype.onMouseMove = function (event) {
-        this.camera.onMouseMove(event);
+    Scene.prototype.setPositionsAndUpdate = function (initialPosition, endPosition) {
+        this.camera.setPositionsAndUpdate(initialPosition, endPosition);
     };
     Scene.prototype.onWheel = function (event) {
         this.camera.onWheel(event);

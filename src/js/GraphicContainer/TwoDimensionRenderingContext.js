@@ -7,8 +7,13 @@ var TwoDimensionRenderingContext;
     };
     TwoDimensionRenderingContext.prototype = Object.create(WebGlRenderingContext.prototype);
     TwoDimensionRenderingContext.constructor = TwoDimensionRenderingContext;
-    TwoDimensionRenderingContext.prototype.clearRect = function () {
-        this.gl.clearRect(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    TwoDimensionRenderingContext.prototype.arc = function (xCenter, yCenter, radius, startingAngle, endingAngle) {
+        this.gl.arc(xCenter, yCenter, radius, startingAngle, endingAngle);
+    };
+    TwoDimensionRenderingContext.prototype.fillRect = function () {
+        this.gl.fillStyle = "#DCDCDC";
+        this.gl.fillOpacity = "0.5";
+        this.gl.fillRect(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     };
     TwoDimensionRenderingContext.prototype.beginPath = function () {
         this.gl.beginPath();

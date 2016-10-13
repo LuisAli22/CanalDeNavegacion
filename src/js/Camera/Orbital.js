@@ -4,8 +4,8 @@
 var Orbital;
 (function () {
     "use strict";
-    Orbital = function (sceneGraphicContainer) {
-        Camera.call(this, sceneGraphicContainer);
+    Orbital = function (sceneGraphicContainer, mouseController) {
+        Camera.call(this, sceneGraphicContainer, mouseController);
         this.radius = 85;
         this.theta = 0.5 * Math.PI;
         this.phi = 0.5 * Math.PI;
@@ -13,9 +13,6 @@ var Orbital;
     };
     Orbital.prototype = Object.create(Camera.prototype);
     Orbital.prototype.constructor = Orbital;
-    Orbital.prototype.increaseAngle = function (eje) {
-        return ((this.endPosition[eje] - this.initialPosition[eje]) / (MOUSESENSITIVENESS));
-    };
     Orbital.prototype.updateRadius = function (increment) {
         if (this.betweenLimits(this.radius + increment, MINIMUMRADIUS, MAXIMUMRADIUS)) {
             this.radius += increment;
@@ -25,7 +22,9 @@ var Orbital;
     Orbital.prototype.betweenLimits = function (value, min, max) {
         return ((value >= min) && (value <= max));
     };
-    Orbital.prototype.updateAngles = function (incrementTheta, incrementPhi) {
+    Orbital.prototype.setAngles = function (initialPosition, endPosition) {
+        var incrementTheta = ((endPosition[YCOORDINATE] - initialPosition[YCOORDINATE]) / (MOUSESENSITIVENESS));
+        var incrementPhi = ((endPosition[XCOORDINATE] - initialPosition[XCOORDINATE]) / (MOUSESENSITIVENESS));
         if (this.betweenLimits(this.theta - incrementTheta, THETAMIN, THETAMAX)) {
             this.theta -= incrementTheta;
         }
@@ -33,13 +32,9 @@ var Orbital;
             this.phi += incrementPhi;
         }
     };
-    Orbital.prototype.onMouseMove = function (event) {
-        if (this.leftButtonPressed) {
-            this.endPosition = this.getScreenCoordinate(event);
-            this.updateAngles(this.increaseAngle(YCOORDINATE), this.increaseAngle(XCOORDINATE));
-            this.initialPosition = this.endPosition;
-            this.update();
-        }
+    Orbital.prototype.setPositionsAndUpdate = function (initialPosition, endPosition) {
+        this.setAngles(initialPosition, endPosition);
+        this.update();
     };
     Orbital.prototype.onWheel = function (event) {
         this.updateRadius(event.deltaY);

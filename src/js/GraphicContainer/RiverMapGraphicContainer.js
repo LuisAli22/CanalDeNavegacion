@@ -2,23 +2,42 @@
 var RiverMapGraphicContainer;
 (function () {
     "use strict";
-    RiverMapGraphicContainer = function () {
-        GraphicContainer.call(this, "riverMap");
+    RiverMapGraphicContainer = function (animationFrame) {
+        GraphicContainer.call(this, "riverMap", animationFrame);
         this.gl = new TwoDimensionRenderingContext(this.canvas);
-        this.xControlPoints = vec4.create();
-        this.yControlPoints = vec4.create();
-        vec4.set(this.xControlPoints, this.canvas.width / 2, this.canvas.width / 4, this.canvas.width / 4, this.canvas.width / 2);
-        vec4.set(this.yControlPoints, 0, this.canvas.height / 3, 2 * this.canvas.height / 3, this.canvas.height);
-        /*  vec4.set(this.xControlPoints, this.canvas.width / 2, this.canvas.width / 2, this.canvas.width / 2, this.canvas.width / 4);
-         vec4.set(this.yControlPoints, 0, 0, 0, this.canvas.height / 3);*/
     };
     RiverMapGraphicContainer.prototype = Object.create(GraphicContainer.prototype);
     RiverMapGraphicContainer.constructor = RiverMapGraphicContainer;
-    RiverMapGraphicContainer.prototype.getCanvas = function () {
-        return this.canvas;
+    RiverMapGraphicContainer.prototype.isOdd = function (number) {
+        return ((number % 2 !== 0) && (number !== 0));
     };
-    RiverMapGraphicContainer.prototype.clearRect = function () {
-        this.gl.clearRect();
+    RiverMapGraphicContainer.prototype.isOddAndIsAtDistanceTwoFromNearestMultipleOfThree = function (index) {
+        return ((this.isOdd(index)) && (((index - 2) % 3) === 0));
+    };
+    RiverMapGraphicContainer.prototype.isEvenAndIsNotAtDistanceTwoFromNearestMultipleOfThree = function (index) {
+        return (!this.isOdd(index)) && (((index - 2) % 3) !== 0);
+    };
+    RiverMapGraphicContainer.prototype.isAtThreeQuarterWidth = function (index) {
+        return (this.isOddAndIsAtDistanceTwoFromNearestMultipleOfThree(index) || (this.isEvenAndIsNotAtDistanceTwoFromNearestMultipleOfThree(index)));
+    };
+    RiverMapGraphicContainer.prototype.getXPositionValue = function (index) {
+        if (index % 3 === 0) {
+            return this.canvas.width / 2;
+        }
+        if (this.isAtThreeQuarterWidth(index)) {
+            return ((5 * this.canvas.width) / 8);
+        }
+        return (3 * this.canvas.width / 8);
+    };
+    RiverMapGraphicContainer.prototype.getYPositionValue = function (index, controlSegmentAmount) {
+        var horizontalDivisionStep = 1 / (controlSegmentAmount * 3);
+        return (index * this.canvas.height * horizontalDivisionStep);
+    };
+    RiverMapGraphicContainer.prototype.arc = function (xCenter, yCenter, radius, startingAngle, endingAngle) {
+        this.gl.arc(xCenter, yCenter, radius, startingAngle, endingAngle);
+    };
+    RiverMapGraphicContainer.prototype.fillRect = function () {
+        this.gl.fillRect();
     };
     RiverMapGraphicContainer.prototype.beginPath = function () {
         this.gl.beginPath();
@@ -40,11 +59,5 @@ var RiverMapGraphicContainer;
     };
     RiverMapGraphicContainer.prototype.setLineDash = function (segments) {
         this.gl.setLineDash(segments);
-    };
-    RiverMapGraphicContainer.prototype.getXControlPoints = function () {
-        return this.xControlPoints;
-    };
-    RiverMapGraphicContainer.prototype.getYControlPoints = function () {
-        return this.yControlPoints;
     };
 }());

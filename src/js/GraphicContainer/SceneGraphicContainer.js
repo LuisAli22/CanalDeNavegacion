@@ -2,8 +2,8 @@
 var SceneGraphicContainer;
 (function () {
     "use strict";
-    SceneGraphicContainer = function () {
-        GraphicContainer.call(this, "scene");
+    SceneGraphicContainer = function (animationFrame) {
+        GraphicContainer.call(this, "scene", animationFrame);
         this.gl = new ThreeDimensionRenderingContext(this.canvas, FRAGMENTSHADERID, VERTEXSHADERID);
     };
     SceneGraphicContainer.prototype = Object.create(GraphicContainer.prototype);
@@ -44,16 +44,11 @@ var SceneGraphicContainer;
     SceneGraphicContainer.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
         this.gl.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
     };
-    SceneGraphicContainer.prototype.getCanvasOffset = function () {
+    /*  SceneGraphicContainer.prototype.getCanvasOffset = function () {
         return this.gl.getCanvasOffset();
-    };
+     };*/
     SceneGraphicContainer.prototype.contextColor = function () {
         this.gl.contextColor();
-    };
-    SceneGraphicContainer.prototype.getCanvasOffset = function () {
-        var offset = vec2.create();
-        vec2.set(offset, this.canvas.offsetLeft, this.canvas.offsetTop);
-        return offset;
     };
     SceneGraphicContainer.prototype.bindEventFunctions = function (geographicView) {
         GraphicContainer.prototype.bindEventFunctions.call(this, geographicView);
