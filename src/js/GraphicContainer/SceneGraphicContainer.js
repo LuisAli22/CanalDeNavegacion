@@ -8,6 +8,12 @@ var SceneGraphicContainer;
     };
     SceneGraphicContainer.prototype = Object.create(GraphicContainer.prototype);
     SceneGraphicContainer.constructor = SceneGraphicContainer;
+    SceneGraphicContainer.prototype.generateMipMap = function (texture) {
+        this.gl.generateMipMap(texture);
+    };
+    SceneGraphicContainer.prototype.setTextureUniform = function (texture) {
+        this.gl.setTextureUniform(texture);
+    };
     SceneGraphicContainer.prototype.getContext = function () {
         return this.gl.getContext();
     };
@@ -29,8 +35,8 @@ var SceneGraphicContainer;
     SceneGraphicContainer.prototype.createDataStore = function (bufferList) {
         this.gl.createDataStore(bufferList);
     };
-    SceneGraphicContainer.prototype.defineGenericVertexAtributeArray = function (bufferList) {
-        this.gl.defineGenericVertexAtributeArray(bufferList);
+    SceneGraphicContainer.prototype.defineGenericVertexAtributeArray = function () {
+        this.gl.defineGenericVertexAtributeArray();
     };
     SceneGraphicContainer.prototype.setTextureModelViewMatrixNormalMatrixTAndDraw = function (modelViewMatrix, texture, indexBuffer) {
         this.gl.setTextureModelViewMatrixNormalMatrixTAndDraw(modelViewMatrix, texture, indexBuffer);
@@ -41,12 +47,9 @@ var SceneGraphicContainer;
     SceneGraphicContainer.prototype.setProjectionMatrixToShaderProgram = function (projectionMatrix) {
         this.gl.setProjectionMatrixToShaderProgram(projectionMatrix);
     };
-    SceneGraphicContainer.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
-        this.gl.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
+    SceneGraphicContainer.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgramAndDraw = function (modelViewMatrix, texture) {
+        this.gl.setModelMatrixNormalMatrixAndSamplerToShaderProgramAndDraw(modelViewMatrix, texture);
     };
-    /*  SceneGraphicContainer.prototype.getCanvasOffset = function () {
-        return this.gl.getCanvasOffset();
-     };*/
     SceneGraphicContainer.prototype.contextColor = function () {
         this.gl.contextColor();
     };
@@ -57,7 +60,7 @@ var SceneGraphicContainer;
     SceneGraphicContainer.prototype.configureLighting = function () {
         this.gl.configureLighting();
     };
-    SceneGraphicContainer.prototype.draw = function () {
-        this.gl.draw();
+    SceneGraphicContainer.prototype.createTexture = function () {
+        return this.gl.createTexture();
     };
 }());

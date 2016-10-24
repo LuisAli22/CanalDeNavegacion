@@ -9,6 +9,7 @@
     <script type="text/javascript" src="js/webgl-utils.js"></script>
     <script type="text/javascript" src="js/dat.gui.min.js"></script>
     <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="js/TextureHandler.js"></script>
     <script type="text/javascript" src="js/Definitions/Definitions.js"></script>
     <script type="text/javascript" src="js/Camera/MouseController.js"></script>
     <script type="text/javascript" src="js/Shader/Compiler.js"></script>
@@ -20,22 +21,24 @@
     <script type="text/javascript" src="js/GraphicContainer/GraphicContainer.js"></script>
     <script type="text/javascript" src="js/GraphicContainer/SceneGraphicContainer.js"></script>
     <script type="text/javascript" src="js/GraphicContainer/RiverMapGraphicContainer.js"></script>
-    <script type="text/javascript" src="js/BasicShapeContainer/ThreeDimensionShapeContainer.js"></script>
-    <script type="text/javascript" src="js/BasicShapeContainer/TwoDimensionShapeContainer.js"></script>
     <script type="text/javascript" src="js/Curves/Bspline.js"></script>
+    <script type="text/javascript" src="js/Curves/ControlPoints.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/TreeTrunk.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/AnimationFrame.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/Scene.js"></script>
-    <script type="text/javascript" src="js/AnimationFrame/RiverMap.js"></script>
+
     <script type="text/javascript" src="js/GraphicalObject/GraphicalObject.js"></script>
-    <script type="text/javascript" src="js/GraphicalObject/RoundBody.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Cylinder.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/SweptSurface.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/River.js"></script>
     <script type="text/javascript" src="js/Camera/Camera.js"></script>
     <script type="text/javascript" src="js/Camera/Orbital.js"></script>
-
+    <script type="text/javascript" src="js/AnimationFrame/RiverMap.js"></script>
     <script id="shader-fs" type="x-shader/x-fragment">
             precision mediump float;
     varying vec2 vTextureCoord;
     varying vec3 vLightWeighting;
+
     uniform sampler2D uSampler;
 void main() {
     vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
@@ -49,6 +52,8 @@ void main() {
         attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
     attribute vec2 aTextureCoord;
+    attribute vec3 aVertexTangent;
+	attribute vec3 aVertexBinormal;
 
     uniform mat4 uViewMatrix;
     uniform mat4 uModelMatrix;
@@ -98,6 +103,8 @@ void main() {
     </script>
 
     <script type="text/javascript">
+        var scene;
+        var riverMap;
         var app = {
             alturaMaxima: 10,
             reiniciar: function () {
@@ -137,13 +144,16 @@ void main() {
         function webGLStart() {
             try {
                 createGUI();
-                var animationFrames = [new Scene(), new RiverMap()];
-                animationFrames.forEach(function (animationFrame) {
-                    animationFrame.tick();
-                });
+                riverMap = new RiverMap();
+                riverMap.tick();
+                refreshScene();
             } catch (e) {
                 alert(e.name + " " + e.message);
             }
+        }
+        function refreshScene() {
+            scene = new Scene(riverMap);
+            scene.tick();
         }
     </script>
 
@@ -156,6 +166,10 @@ void main() {
     <canvas id="riverMap" style="border: solid#696969;" width="360" height="360">
         Your browser does not support the HTML5 canvas element.
     </canvas>
+</div>
+<br>
+<div style="text-align: center;">
+    <input type="image" src="img/refresh.png" alt="Refresh" width="48" height="48" onclick="refreshScene()">
 </div>
 <br>
 <div id="header">

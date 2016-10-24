@@ -6,10 +6,12 @@ var ThreeDimensionRenderingContext;
         WebGlRenderingContext.call(this, canvas, "experimental-webgl");
         this.fragmentShaderIdentifier = fragmentShaderIdentifier;
         this.vertexShaderIdentifier = vertexShaderIdentifier;
-        this.webgl_position_buffer = this.gl.createBuffer();
-        this.webgl_normal_buffer = this.gl.createBuffer();
-        this.webgl_texture_coord_buffer = this.gl.createBuffer();
-        this.webgl_index_buffer = this.gl.createBuffer();
+        this.webgl_position_buffer = null;
+        this.webgl_normal_buffer = null;
+        this.webgl_texture_coord_buffer = null;
+        this.webgl_index_buffer = null;
+        this.webgl_tangent_buffer = null;
+        this.webgl_binormal_buffer = null;
         this.gl.viewportWidth = canvas.width;
         this.gl.viewportHeight = canvas.height;
         this.offsetLeft = canvas.offsetLeft;
@@ -19,6 +21,18 @@ var ThreeDimensionRenderingContext;
     };
     ThreeDimensionRenderingContext.prototype = Object.create(WebGlRenderingContext.prototype);
     ThreeDimensionRenderingContext.constructor = ThreeDimensionRenderingContext;
+    ThreeDimensionRenderingContext.prototype.createTexture = function () {
+        return this.gl.createTexture();
+    };
+    ThreeDimensionRenderingContext.prototype.generateMipMap = function (texture) {
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, texture.image);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    };
     ThreeDimensionRenderingContext.prototype.contextEnableDepthTest = function () {
         this.gl.enable(this.gl.DEPTH_TEST);
     };
@@ -39,22 +53,40 @@ var ThreeDimensionRenderingContext;
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     };
     ThreeDimensionRenderingContext.prototype.createDataStore = function (dataBufferList) {
+        this.webgl_normal_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(dataBufferList.normal), this.gl.STATIC_DRAW);
         this.webgl_normal_buffer.itemSize = 3;
         this.webgl_normal_buffer.numItems = dataBufferList.normal.length / 3;
+        this.webgl_texture_coord_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_texture_coord_buffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(dataBufferList.texture_coord), this.gl.STATIC_DRAW);
         this.webgl_texture_coord_buffer.itemSize = 2;
         this.webgl_texture_coord_buffer.numItems = dataBufferList.texture_coord.length / 2;
+        this.webgl_position_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_position_buffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(dataBufferList.position), this.gl.STATIC_DRAW);
         this.webgl_position_buffer.itemSize = 3;
         this.webgl_position_buffer.numItems = dataBufferList.position.length / 3;
+        this.webgl_index_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(dataBufferList.index), this.gl.STATIC_DRAW);
         this.webgl_index_buffer.itemSize = 1;
         this.webgl_index_buffer.numItems = dataBufferList.index.length;
+        if (dataBufferList.tangent.length !== 0) {
+            this.webgl_tangent_buffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(dataBufferList.tangent), this.gl.STATIC_DRAW);
+            this.webgl_tangent_buffer.itemSize = 3;
+            this.webgl_tangent_buffer.numItems = dataBufferList.tangent.length / 3;
+        }
+        if (dataBufferList.binormal.length !== 0) {
+            this.webgl_binormal_buffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_binormal_buffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(dataBufferList.binormal), this.gl.STATIC_DRAW);
+            this.webgl_binormal_buffer.itemSize = 3;
+            this.webgl_binormal_buffer.numItems = dataBufferList.binormal.length / 3;
+        }
     };
     ThreeDimensionRenderingContext.prototype.getAspectRatio = function () {
         return (this.gl.viewportWidth / this.gl.viewportHeight);
@@ -86,6 +118,29 @@ var ThreeDimensionRenderingContext;
         this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.webgl_texture_coord_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        if (this.webgl_tangent_buffer !== null) {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
+            this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        } else {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
+            this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        }
+        if (this.webgl_binormal_buffer !== null) {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_binormal_buffer);
+            this.gl.vertexAttribPointer(this.shaderProgram.vertexBinormalAttribute, this.webgl_binormal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        } else {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
+            this.gl.vertexAttribPointer(this.shaderProgram.vertexBinormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        }
+    };
+    ThreeDimensionRenderingContext.prototype.setTextureUniform = function (texture) {
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+    };
+    ThreeDimensionRenderingContext.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgramAndDraw = function (modelViewMatrix) {
+        this.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
+        this.draw();
     };
     ThreeDimensionRenderingContext.prototype.setViewMatrixToShaderProgram = function (lookAtMatrix) {
         this.gl.uniformMatrix4fv(this.shaderProgram.ViewMatrixUniform, false, lookAtMatrix);
@@ -95,7 +150,6 @@ var ThreeDimensionRenderingContext;
     };
     ThreeDimensionRenderingContext.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
         this.gl.uniformMatrix4fv(this.shaderProgram.ModelMatrixUniform, false, modelViewMatrix);
-        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
         var normalMatrix = mat3.create();
         mat3.fromMat4(normalMatrix, modelViewMatrix);
         mat3.invert(normalMatrix, normalMatrix);
@@ -105,8 +159,5 @@ var ThreeDimensionRenderingContext;
     ThreeDimensionRenderingContext.prototype.draw = function () {
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
         this.gl.drawElements(this.gl.TRIANGLE_STRIP, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
-    };
-    ThreeDimensionRenderingContext.prototype.getContext = function () {
-        return this.gl;
     };
 }());
