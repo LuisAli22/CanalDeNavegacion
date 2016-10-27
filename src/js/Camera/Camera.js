@@ -5,6 +5,8 @@ var Camera;
     "use strict";
     Camera = function (sceneGraphicContainer) {
         this.sceneGraphicContainer = sceneGraphicContainer;
+        this.gl = sceneGraphicContainer.getContext();
+        this.shaderProgram = this.sceneGraphicContainer.getShaderProgram();
         this.eye = vec3.create();
         vec3.set(this.eye, 0, 0, 0);
         this.target = vec3.create();
@@ -17,6 +19,6 @@ var Camera;
         mat4.identity(this.lookAtMatrix);
         this.setViewDirection();
         mat4.lookAt(this.lookAtMatrix, this.eye, this.target, this.up);
-        this.sceneGraphicContainer.setViewMatrixToShaderProgram(this.lookAtMatrix);
+        this.gl.uniformMatrix4fv(this.shaderProgram.ViewMatrixUniform, false, this.lookAtMatrix);
     };
 }());

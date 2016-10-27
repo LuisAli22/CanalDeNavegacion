@@ -13,6 +13,10 @@ var Cylinder;
     };
     Cylinder.prototype = Object.create(GraphicalObject.prototype);
     Cylinder.prototype.constructor = Cylinder;
+    Cylinder.prototype.setUpBuffers = function (slices, height) {
+        this.loadBuffers(slices, height);
+        this.bindBuffers();
+    };
     Cylinder.prototype.loadIndexBuffer = function (height, slices, currentSlice) {
         if (height === 0) {
             this.bufferList.index.push(0, currentSlice, currentSlice + 1);

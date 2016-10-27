@@ -9,6 +9,8 @@
     <script type="text/javascript" src="js/webgl-utils.js"></script>
     <script type="text/javascript" src="js/dat.gui.min.js"></script>
     <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="js/Util/Calculator.js"></script>
+    <script type="text/javascript" src="js/GraphicalUserInterfaceControl/GraphicalUserInterfaceControl.js"></script>
     <script type="text/javascript" src="js/TextureHandler.js"></script>
     <script type="text/javascript" src="js/Definitions/Definitions.js"></script>
     <script type="text/javascript" src="js/Camera/MouseController.js"></script>
@@ -22,7 +24,8 @@
     <script type="text/javascript" src="js/GraphicContainer/SceneGraphicContainer.js"></script>
     <script type="text/javascript" src="js/GraphicContainer/RiverMapGraphicContainer.js"></script>
     <script type="text/javascript" src="js/Curves/Bspline.js"></script>
-    <script type="text/javascript" src="js/Curves/ControlPoints.js"></script>
+    <script type="text/javascript" src="js/Curves/BsplineMatrix.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Ground.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/TreeTrunk.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/AnimationFrame.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/Scene.js"></script>
@@ -30,7 +33,6 @@
     <script type="text/javascript" src="js/GraphicalObject/GraphicalObject.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Cylinder.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/SweptSurface.js"></script>
-    <script type="text/javascript" src="js/GraphicalObject/River.js"></script>
     <script type="text/javascript" src="js/Camera/Camera.js"></script>
     <script type="text/javascript" src="js/Camera/Orbital.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/RiverMap.js"></script>
@@ -105,7 +107,9 @@ void main() {
     <script type="text/javascript">
         var scene;
         var riverMap;
-        var app = {
+        var gl;
+        var shaderProgram;
+        var controlValues = {
             alturaMaxima: 10,
             reiniciar: function () {
                 alert("apreto reiniciar");
@@ -114,36 +118,14 @@ void main() {
                 alert("apreto detener");
             },
             modo: "random",
-            ancho: 0,
+            riverWidth: 80,
             umbral: 100
-
         };
-        function createGUI() {
-            /*  this.guiContainer = document.getElementById("control");
-             if (!this.guiContainer) {
-             throw new Error("Can 't get control canvas");
-             }*/
-            var gui = new dat.GUI();
-            var f1 = gui.addFolder("Comandos");
-            f1.add(app, "reiniciar").name("Reiniciar");
-            f1.add(app, "detener").name("detener");
-            f1.open();
-
-            var f2 = gui.addFolder("Parametros generales");
-            f2.add(app, "alturaMaxima", 1.0, 60.0).name("altura maxima").step(1);
-            f2.add(app, "ancho", 4, 25).name("Ancho");
-
-            f2.add(app, "modo", ["random", "secuencial"]).name("modo");
-            var f3 = gui.addFolder("Parametros Especiales ");
-            f3.add(app, "umbral", 0.0, 1.0).name("umbral");
-            f1.open();
-            f2.open();
-            f3.open();
-            //this.guiContainer.appendChild(gui.domElement);
-        }
+        var graphicalUSerInterfaceControl;
         function webGLStart() {
             try {
-                createGUI();
+                graphicalUSerInterfaceControl = new GraphicalUserInterfaceControl();
+                graphicalUSerInterfaceControl.start();
                 riverMap = new RiverMap();
                 riverMap.tick();
                 refreshScene();
