@@ -17,8 +17,8 @@ var Scene;
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.modelViewMatrix = mat4.create();
-        this.trunk = new TreeTrunk(this.sceneGraphicContainer, this.textureHandler);
-        this.ground = new Ground(this.sceneGraphicContainer, riverMap, this.textureHandler);
+        //this.trunk = new TreeTrunk(this.sceneGraphicContainer, this.textureHandler);
+        this.ground = new Ground(this.sceneGraphicContainer, riverMap, this.textureHandler, this.mvStack);
         this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
     };
     Scene.prototype = Object.create(AnimationFrame.prototype);
@@ -34,11 +34,11 @@ var Scene;
         this.gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.projectionMatrix);
     };
     Scene.prototype.configureLighting = function () {
-        var lighting = 1;
+        var lighting = 0;
         this.gl.uniform1i(this.shaderProgram.useLightingUniform, lighting);
-        var lightPosition = vec3.fromValues(-100.0, 0.0, -60.0);
+        var lightPosition = vec3.fromValues(-1500.0, 100.0, -1500.0);
         this.gl.uniform3fv(this.shaderProgram.lightingDirectionUniform, lightPosition);
-        this.gl.uniform3f(this.shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
+        this.gl.uniform3f(this.shaderProgram.ambientColorUniform, 0.25, 0.25, 0.25);
         this.gl.uniform3f(this.shaderProgram.directionalColorUniform, 0.05, 0.05, 0.05);
     };
     Scene.prototype.draw = function () {
@@ -50,9 +50,10 @@ var Scene;
     };
     Scene.prototype.drawObject = function () {
         this.mvStack.push(this.modelViewMatrix);
+        mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(0.3, 0.3, 0.8));
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(-1 * this.riverMapCenter[0], 0, -1 * this.riverMapCenter[1]));
         this.ground.draw(this.modelViewMatrix);
         mat4.copy(this.modelViewMatrix, this.mvStack.pop());
-        this.trunk.draw(this.modelViewMatrix);
+        //this.trunk.draw(this.modelViewMatrix);
     };
 }());

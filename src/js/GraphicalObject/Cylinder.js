@@ -40,11 +40,10 @@ var Cylinder;
         var binormal;
         var tangent;
         for (currentSlice = 0; currentSlice <= slices; currentSlice += 1) {
-            position = [Math.sin(angle * currentSlice), height, Math.cos(angle * currentSlice)];
-            normal = [0.0, k, 0.0];
-            binormal = vec3.normalize([], position);
-            tangent = vec3.normalize([], vec3.cross([], binormal, normal));
-
+            position = vec3.fromValues(Math.sin(angle * currentSlice), height, Math.cos(angle * currentSlice));
+            normal = vec3.fromValues(0.0, k, 0.0);
+            binormal = vec3.normalize(vec3.create(), position);
+            tangent = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), binormal, normal));
             this.bufferList.texture_coord.push(position[0], position[2]);
             this.bufferList.position.push(position[0], position[1], position[2]);
             this.bufferList.normal.push(normal[0], normal[1], normal[2]);
@@ -71,8 +70,8 @@ var Cylinder;
         this.bufferList.texture_coord.push(1, (i + 1) / slices * this.textureStep);
     };
     Cylinder.prototype.loadNormalBinormalAndTangent = function (currentPoint, nextPoint) {
-        var n1 = [currentPoint.x, currentPoint.y, currentPoint.z];
-        var n2 = [nextPoint.x, nextPoint.y, nextPoint.z];
+        var n1 = vec3.fromValues(currentPoint.x, currentPoint.y, currentPoint.z);
+        var n2 = vec3.fromValues(nextPoint.x, nextPoint.y, nextPoint.z);
         this.bufferList.normal.push(n1[0], n1[1], n1[2]);
         this.bufferList.normal.push(n2[0], n2[1], n2[2]);
         this.bufferList.normal.push(n1[0], n1[1], n1[2]);
@@ -83,8 +82,8 @@ var Cylinder;
         this.bufferList.binormal.push(0.0, 1.0, 0.0);
         this.bufferList.binormal.push(0.0, 1.0, 0.0);
 
-        var t1 = vec3.cross([], n1, [0.0, 1.0, 0.0]);
-        var t2 = vec3.cross([], n1, [0.0, 1.0, 0.0]);
+        var t1 = vec3.cross(vec3.create(), n1, vec3.fromValues(0.0, 1.0, 0.0));
+        var t2 = vec3.cross(vec3.create(), n1, vec3.fromValues(0.0, 1.0, 0.0));
 
         this.bufferList.tangent.push(t1[0], t1[1], t1[2]);
         this.bufferList.tangent.push(t2[0], t2[1], t2[2]);

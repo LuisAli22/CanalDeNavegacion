@@ -67,4 +67,7 @@ var SweptSurface;
         this.loadIndexBufferData();
         this.bindBuffers();
     };
+    SweptSurface.prototype.getPositionBuffer = function () {
+        return this.bufferList.position;
+    };
 }());
