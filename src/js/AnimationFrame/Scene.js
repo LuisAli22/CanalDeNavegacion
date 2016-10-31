@@ -50,10 +50,9 @@ var Scene;
     };
     Scene.prototype.drawObject = function () {
         this.mvStack.push(this.modelViewMatrix);
-        mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(0.3, 0.3, 0.8));
+        mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(0.5, 0.5, 0.5));
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(-1 * this.riverMapCenter[0], 0, -1 * this.riverMapCenter[1]));
         this.ground.draw(this.modelViewMatrix);
         mat4.copy(this.modelViewMatrix, this.mvStack.pop());
-        //this.trunk.draw(this.modelViewMatrix);
     };
 }());

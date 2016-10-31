@@ -68,6 +68,6 @@ var SweptSurface;
         this.bindBuffers();
     };
     SweptSurface.prototype.getPositionBuffer = function () {
-        return this.bufferList.position;
+        return this.bufferList.position.slice(0);
     };
 }());

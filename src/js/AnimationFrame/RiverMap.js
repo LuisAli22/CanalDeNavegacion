@@ -6,7 +6,7 @@ var RiverMap;
     RiverMap = function () {
         AnimationFrame.call(this);
         this.riverMapGraphicContainer = new RiverMapGraphicContainer(this);
-        this.controlSegmentAmount = 1;
+        this.controlSegmentAmount = 2;
         this.controlPointsAmount = 3 * this.controlSegmentAmount + 1;
         this.controlPoints = [];
         this.setControlPoints();
@@ -20,6 +20,12 @@ var RiverMap;
     RiverMap.prototype.getCurveCenter = function () {
         return this.origin;
     };
+    RiverMap.prototype.resetSecondPointAndPreviousLastPointPositionsToMakeExtemesTangenPerpenduclarToXAxis = function () {
+        var previousIndex = this.controlPoints.length - 2;
+        var lastIndex = this.controlPoints.length - 1;
+        this.controlPoints[1][0] = this.controlPoints[0][0];
+        this.controlPoints[previousIndex][0] = this.controlPoints[lastIndex][0];
+    };
     RiverMap.prototype.setControlPoints = function () {
         var index;
         var x;
@@ -31,9 +37,10 @@ var RiverMap;
             point = [x, 0, z];
             this.controlPoints.push(point);
         }
+        this.resetSecondPointAndPreviousLastPointPositionsToMakeExtemesTangenPerpenduclarToXAxis();
     };
     RiverMap.prototype.clikedPointIsNotOneOfTheExtreme = function (index, controlPointsLength) {
-        return ((index !== 0) && (index !== controlPointsLength - 1));
+        return ((index > 1) && (index < controlPointsLength - 2));
     };
     RiverMap.prototype.getControlPointClicked = function (initialPosition) {
         var index;

@@ -25,8 +25,15 @@ var Calculator = (function () {
             if (isLastPoint) {
                 vec3.scale(tangent, tangent, -1);
             }
-            var binormal = crossProductAndNormalize(tangent, previousPointPosition);
-            var normal = crossProductAndNormalize(binormal, tangent);
+            var binormal;
+            var normal;
+            if (previousPointPosition[0] === 0 && previousPointPosition[1] === 0 && previousPointPosition[2] === 0) {
+                normal = crossProductAndNormalize(tangent, vec3.fromValues(1, 0, 1));
+                binormal = crossProductAndNormalize(normal, tangent);
+            } else {
+                binormal = crossProductAndNormalize(tangent, previousPointPosition);
+                normal = crossProductAndNormalize(binormal, tangent);
+            }
             geometry.push({
                 "position": previousPointPosition,
                 "tangent": tangent,
