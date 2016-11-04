@@ -6,9 +6,9 @@ var Orbital;
     "use strict";
     Orbital = function (sceneGraphicContainer, mouseController) {
         Camera.call(this, sceneGraphicContainer, mouseController);
-        this.radius = 350;
-        this.theta = 0.9;
-        this.phi = 0.5 * Math.PI;
+        this.radius = 100;
+        this.theta = 0.39 * Math.PI;
+        this.phi = 1.6 * Math.PI;
         this.update();
     };
     Orbital.prototype = Object.create(Camera.prototype);

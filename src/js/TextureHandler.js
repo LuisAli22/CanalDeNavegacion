@@ -1,32 +1,44 @@
-var TextureHandler;
-(function () {
+var TextureHandler = (function () {
     "use strict";
-    TextureHandler = function (graphicContainer) {
-        this.gl = graphicContainer.getContext();
-        this.shaderProgram = graphicContainer.getShaderProgram();
-    };
-    TextureHandler.prototype.generateMipMap = function (texture) {
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, texture.image);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
-        this.gl.generateMipmap(this.gl.TEXTURE_2D);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-    };
-    TextureHandler.prototype.initializeTexture = function (texturePath) {
-        var currrentTextureHandler = this;
-        var texture = this.gl.createTexture();
-        texture.image = new Image();
-        texture.image.onload = function () {
-            currrentTextureHandler.generateMipMap(texture);
+    var instance;
+
+    function init(graphicContainer) {
+        var gl = graphicContainer.getContext();
+        var shaderProgram = graphicContainer.getShaderProgram();
+        return {
+            generateMipMap: function (texture) {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+            },
+            initializeTexture: function (texturePath) {
+                var currrentTextureHandler = this;
+                var texture = gl.createTexture();
+                texture.image = new Image();
+                texture.image.onload = function () {
+                    currrentTextureHandler.generateMipMap(texture);
+                };
+                texture.image.src = texturePath;
+                return texture;
+            },
+            setTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(shaderProgram.samplerUniform, 0);
+            }
         };
-        texture.image.src = texturePath;
-        return texture;
-    };
-    TextureHandler.prototype.setTextureUniform = function (texture) {
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+    }
+
+    return {
+        getInstance: function (graphicContainer) {
+            if (!instance) {
+                instance = init(graphicContainer);
+            }
+            return instance;
+        }
     };
 }());

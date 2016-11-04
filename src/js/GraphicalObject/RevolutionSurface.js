@@ -2,8 +2,9 @@
 var RevolutionSurface;
 (function () {
     "use strict";
-    RevolutionSurface = function (graphicContainer, profiles, startAngle, endAngle, slicesPerSection, rotationAxis, uTextureScale, vTextureScale) {
+    RevolutionSurface = function (graphicContainer, profiles, startAngle, endAngle, slicesPerSection, rotationAxis, uTextureScale, vTextureScale, color) {
         GraphicalObject.call(this, graphicContainer);
+        this.color = color;
         this.uTextureScale = uTextureScale;
         this.vTextureScale = vTextureScale;
         this.profiles = profiles;
@@ -46,6 +47,7 @@ var RevolutionSurface;
                     pt = vec3.transformMat4(vec3.create(), pt, rotationMatrix);
 
                     this.bufferList.position.push(levelPoint[0], levelPoint[1], levelPoint[2]);
+                    this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
                     this.bufferList.normal.push(pbn[0], pbn[1], pbn[2]);
                     this.bufferList.binormal.push(pn[0], pn[1], pn[2]);
                     this.bufferList.tangent.push(pt[0], pt[1], pt[2]);
@@ -98,6 +100,7 @@ var RevolutionSurface;
                 for (k = 0; k < l; k += 1) {
                     position = levelCurve[k].position;
                     this.bufferList.position.push(position[0], position[1], position[2]);
+                    this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
                     this.bufferList.texture_coord.push(this.uTextureScale * k, this.vTextureScale * i);
                 }
             }

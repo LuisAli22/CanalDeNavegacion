@@ -2,8 +2,9 @@
 var SweptSurface;
 (function () {
     "use strict";
-    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints) {
-        GraphicalObject.call(this, graphicContainer);
+    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints, color) {
+        GraphicalObject.call(this, graphicContainer, color);
+        this.color = color;
         this.levelPoints = levelPoints.slice(0);
         this.trajectoryPoints = trajectoryPoints.slice(0);
         this.setUpBuffers();
@@ -34,6 +35,7 @@ var SweptSurface;
         this.storePointPosition(trajectoryPoint, levelPoint);
         this.storePointNormalAndBinormal(trajectoryPoint, levelPoint);
         this.bufferList.tangent.push(trajectoryPoint.tangent[0], trajectoryPoint.tangent[1], trajectoryPoint.tangent[2]);
+        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
     };
     SweptSurface.prototype.loadIndexBufferData = function () {
         var trajectoryIndex;

@@ -1,22 +1,34 @@
 /*jslint browser: true*/
 /*global mat4*/
-var ModelViewMatrixStack;
-(function () {
+var ModelViewMatrixStack = (function () {
     "use strict";
-    ModelViewMatrixStack = function () {
-        this.stack = [];
-    };
-    ModelViewMatrixStack.prototype.push = function (mvMatrix) {
-        var mvMatrixCopy = mat4.clone(mvMatrix);
-        this.stack.push(mvMatrixCopy);
-    };
-    ModelViewMatrixStack.prototype.pop = function () {
-        if (this.stack.length === 0) {
-            throw "Invalid popMatrix!";
+    var instance;
+
+    function init() {
+        var stack = [];
+        return {
+            push: function (mvMatrix) {
+                var mvMatrixCopy = mat4.clone(mvMatrix);
+                stack.push(mvMatrixCopy);
+            },
+            pop: function () {
+                if (stack.length === 0) {
+                    throw "Invalid popMatrix!";
+                }
+                return stack.pop();
+            },
+            length: function () {
+                return stack.length;
+            }
+        };
+    }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = init();
+            }
+            return instance;
         }
-        return this.stack.pop();
-    };
-    ModelViewMatrixStack.prototype.length = function () {
-        return this.stack.length;
     };
 }());

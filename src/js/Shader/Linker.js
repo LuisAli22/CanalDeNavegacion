@@ -20,6 +20,8 @@ var Linker;
         this.gl.enableVertexAttribArray(this.shaderProgram.vertexTangentAttribute);
         this.shaderProgram.vertexBinormalAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexBinormal");
         this.gl.enableVertexAttribArray(this.shaderProgram.vertexBinormalAttribute);
+        this.shaderProgram.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
+        this.gl.enableVertexAttribArray(this.shaderProgram.vertexColorAttribute);
         this.shaderProgram.pMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, UPMATRIX);
         this.shaderProgram.ViewMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, UVIEWMATRIX);
         this.shaderProgram.ModelMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, UMODELMATRIX);
@@ -29,6 +31,7 @@ var Linker;
         this.shaderProgram.ambientColorUniform = this.gl.getUniformLocation(this.shaderProgram, UAMBIENTCOLOR);
         this.shaderProgram.lightingDirectionUniform = this.gl.getUniformLocation(this.shaderProgram, ULIGHTPOSITION);
         this.shaderProgram.directionalColorUniform = this.gl.getUniformLocation(this.shaderProgram, UDIRECTIONALCOLOR);
+        this.shaderProgram.useTextureUniform = this.gl.getUniformLocation(this.shaderProgram, "uUseTexture");
     };
     Linker.prototype.start = function () {
         this.gl.attachShader(this.shaderProgram, this.vertexShader);

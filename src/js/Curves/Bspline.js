@@ -19,8 +19,6 @@ var Bspline;
         }
         bSplineMatrix.multiplyByVector(currentControlPointsInOneCoordinate);
         return bSplineMatrix.getCurvePoint(u, getPosition);
-        /*position.add(bSplineMatrix.getCurvePoint(u, true));
-         tangent.add(bSplineMatrix.getCurvePoint(u, false));*/
     };
     Bspline.prototype.getIndex = function (position) {
         if (position < 2) {

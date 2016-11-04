@@ -21,4 +21,7 @@ var Camera;
         mat4.lookAt(this.lookAtMatrix, this.eye, this.target, this.up);
         this.gl.uniformMatrix4fv(this.shaderProgram.ViewMatrixUniform, false, this.lookAtMatrix);
     };
+    Camera.prototype.getMatrix = function () {
+        return this.lookAtMatrix;
+    };
 }());

@@ -2,10 +2,10 @@
 var TreeCrown;
 (function () {
     "use strict";
-    TreeCrown = function (graphicContainer, slices, pointsPerSegment, textureHandler) {
-        this.textureHandler = textureHandler;
+    TreeCrown = function (graphicContainer, slices, pointsPerSegment) {
         var n = Math.floor((Math.random() * 3) + 1);
-        this.crownTexture = textureHandler.initializeTexture("img/crown_" + n + ".jpg");
+        this.textureHandler = TextureHandler.getInstance(graphicContainer);
+        this.crownTexture = this.textureHandler.initializeTexture("img/crown_" + n + ".jpg");
         this.uTextureScale = 1 / 4;
         this.vTextureScale = 1 / 8;
         this.pointsPerSegment = pointsPerSegment;
@@ -15,7 +15,7 @@ var TreeCrown;
         this.profileControlPointsLength = 19;
         this.profiles = [];
         this.initProfiles();
-        this.crown = new RevolutionSurface(graphicContainer, this.profiles, 0, 2 * Math.PI, Math.floor(slices / this.profilesLength), [0, 1, 0], this.uTextureScale, this.vTextureScale);
+        this.crown = new RevolutionSurface(graphicContainer, this.profiles, 0, 2 * Math.PI, Math.floor(slices / this.profilesLength), [0, 1, 0], this.uTextureScale, this.vTextureScale, [0x00, 0x33, 0x00]);
     };
     TreeCrown.prototype.initProfiles = function () {
         var i;

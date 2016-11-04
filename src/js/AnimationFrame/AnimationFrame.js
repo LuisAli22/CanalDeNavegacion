@@ -5,8 +5,8 @@
 var AnimationFrame;
 (function () {
     "use strict";
-    AnimationFrame = function () {
-        this.mvStack = new ModelViewMatrixStack();
+    AnimationFrame = function (graphicContainer) {
+        this.graphicContainer = graphicContainer;
     };
     AnimationFrame.prototype.tick = function () {
         requestAnimFrame(this.tick.bind(this));

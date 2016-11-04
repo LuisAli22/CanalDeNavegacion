@@ -3,6 +3,7 @@ var GraphicalObject;
 (function () {
     "use strict";
     GraphicalObject = function (graphicContainer) {
+        this.graphicContainer = graphicContainer;
         this.gl = graphicContainer.getContext();
         this.shaderProgram = graphicContainer.getShaderProgram();
         this.bufferList = {
@@ -11,7 +12,8 @@ var GraphicalObject;
             "texture_coord": [],
             "index": [],
             "tangent": [],
-            "binormal": []
+            "binormal": [],
+            "color": []
         };
         this.webgl_position_buffer = null;
         this.webgl_normal_buffer = null;
@@ -19,6 +21,7 @@ var GraphicalObject;
         this.webgl_index_buffer = null;
         this.webgl_tangent_buffer = null;
         this.webgl_binormal_buffer = null;
+        this.webgl_color_buffer = null;
     };
     GraphicalObject.prototype.bindBuffers = function () {
         this.webgl_normal_buffer = this.gl.createBuffer();
@@ -55,6 +58,11 @@ var GraphicalObject;
             this.webgl_binormal_buffer.itemSize = 3;
             this.webgl_binormal_buffer.numItems = this.bufferList.binormal.length / 3;
         }
+        this.webgl_color_buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_color_buffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.bufferList.color), this.gl.STATIC_DRAW);
+        this.webgl_color_buffer.itemSize = 3;
+        this.webgl_color_buffer.numItems = this.bufferList.color.length / 3;
     };
     GraphicalObject.prototype.defineGenericVertexAtributeArray = function () {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_position_buffer);
@@ -63,6 +71,8 @@ var GraphicalObject;
         this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.webgl_texture_coord_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_color_buffer);
+        this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, this.webgl_color_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         if (this.webgl_tangent_buffer !== null) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
