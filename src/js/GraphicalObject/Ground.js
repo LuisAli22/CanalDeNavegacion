@@ -23,7 +23,9 @@ var Ground;
         this.grassRight = new GrassRightSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance);
         this.grassLeft = new GrassLeftSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance);
         this.street = new Street(graphicContainer, this.grassRight.getRiverIntersection(), this.grassLeft.getRiverIntersection());
-        this.bridge = new Bridge(graphicContainer, this.bottomRiver, this.riverWidth, this.street);
+        var xLeftSide = this.grassLeft.getRiverIntersection();
+        var xRightSide = this.grassRight.getRiverIntersection();
+        this.bridge = new Bridge(graphicContainer, this.bottomRiver, this.riverWidth, this.street, xLeftSide, xRightSide);
     };
     Ground.prototype.recordYValueBottomRiver = function (y) {
         if (this.bottomRiverUnseted) {

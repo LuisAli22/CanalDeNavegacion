@@ -2,8 +2,9 @@
 var TowerBody;
 (function () {
     "use strict";
-    TowerBody = function (graphicContainer) {
+    TowerBody = function (graphicContainer, height) {
         this.width = 1;
+        this.height = height;
         this.towerBodyLevelGeometry = [];
         this.createLevelPoints();
         this.towerBodyTrajectory = [];
@@ -18,11 +19,14 @@ var TowerBody;
         var calculator = Calculator.getInstance();
         calculator.storePositionsTangentNormalAndBinormal(levelPointsPosition, this.towerBodyLevelGeometry);
     };
-    TowerBody.prototype.getLevelPoints = function () {
-        return this.towerBodyLevelGeometry.slice(0);
-    };
     TowerBody.prototype.createTrajectory = function () {
-        var controlPoints = [[0, 0, 0], [0, 1 / 4, 0], [0, 2 / 4, 0], [0, 3 / 4, 0], [0, 1, 0]];
+        //var controlPoints = [[0, 0, 0], [0, 1 / 4, 0], [0, 2 / 4, 0], [0, 3 / 4, 0], [0, 1, 0]];
+        var controlPoints = [];
+        var heightIndex;
+        var stepHeight = this.height / 3;
+        for (heightIndex = 0; heightIndex < 4; heightIndex += 1) {
+            controlPoints.push([0, heightIndex * stepHeight, 0]);
+        }
         var bSpline = new Bspline(controlPoints, 5, [1, 0, 0]);
         var curvePoints = bSpline.getCurvePoints();
         curvePoints.forEach(function (element) {

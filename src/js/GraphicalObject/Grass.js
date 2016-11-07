@@ -1,4 +1,4 @@
-/*global GraphicalObject, XCOORDINATE, YCOORDINATE, ZCOORDINATE, vec3, Calculator, SweptSurface, mat4, Tree, TextureHandler, Street, ModelViewMatrixStack*/
+/*global GraphicalObject, XCOORDINATE, YCOORDINATE, ZCOORDINATE, vec3, Calculator, SweptSurface, mat4, Tree, TextureHandler, Street, ModelViewMatrixStack, controlValues*/
 var Grass;
 (function () {
     "use strict";
@@ -25,17 +25,9 @@ var Grass;
     };
     Grass.prototype = Object.create(GraphicalObject.prototype);
     Grass.prototype.constructor = Grass;
-    /*Grass.prototype.setUpStreetLimits = function () {
-     if (this.grassLimit > this.xRiverStop) {
-     this.xBegin = this.xRiverStop;
-     this.xEnd = this.grassLimit;
-     } else {
-     this.xBegin = this.grassLimit;
-     this.xEnd = this.xRiverStop;
-     }
-     };*/
     Grass.prototype.setRiverStreetIntersection = function (zCoordinate, xCoordinate, signOrientation) {
-        if (zCoordinate - 180 < 1) {
+        var streetZPosition = (controlValues.bridgePosition / 100) * 360;
+        if (zCoordinate - streetZPosition < 1) {
             this.xRiverStop = xCoordinate + (signOrientation) * 7;
         }
     };
@@ -49,7 +41,6 @@ var Grass;
             if (this.isEdge(index)) {
                 if (stepEdge % 5 === 0) {
                     this.addBankPoints(index);
-                    this.setRiverStreetIntersection(index);
                 }
                 stepEdge += 1;
             }

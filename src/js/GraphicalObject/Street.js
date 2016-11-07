@@ -5,7 +5,8 @@ var Street;
     Street = function (graphicContainer, riverRightSideLimit, riverLeftSideLimit) {
         this.riverRightSideLimit = riverRightSideLimit;
         this.riverLeftSideLimit = riverLeftSideLimit;
-        this.width = 5;
+        this.width = 2.5;
+        this.streetXCenter = 0;
         this.streetZPositionValue = ((controlValues.bridgePosition / 100) * 360) - (this.width / 2);
         this.streetLevelGeometry = [];
         this.createStreetLevelPoints();
@@ -20,6 +21,9 @@ var Street;
     };
     Street.prototype.getWidth = function () {
         return this.width;
+    };
+    Street.prototype.getStreetXCenter = function () {
+        return this.streetXCenter;
     };
     Street.prototype.createStreetLevelPoints = function () {
         var levelPointsPosition = [[0, 0, 0], [(3 / 10) * this.width, 0, 0], [this.width / 2, 0, 0], [(4 / 5) * this.width, 0, 0], [this.width, 0, 0], [this.width, 0.25, 0], [(19 / 20) * this.width, 0.25, 0], [(9 / 10) * this.width, 0.125, 0], [this.width / 2, 0.125, 0], [this.width / 10, 0.125, 0], [this.width / 20, 0.25, 0], [0, 0.25, 0], [0, 0, 0]];
@@ -67,6 +71,7 @@ var Street;
             [xBegin + (4 * xStep), lastTrajectoryPointInserted[1] + (3 * controlValues.ph2 / 40), this.streetZPositionValue],
             [xBegin + (5 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 10), this.streetZPositionValue],
             [xBegin + (6 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 10), this.streetZPositionValue]];
+        this.streetXCenter = xBegin + (6 * xStep);
         this.loadCurvePointsToTrajectory(controlPoints);
         controlPoints = [[xBegin + (6 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 10), this.streetZPositionValue],
             [xBegin + (7 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 10), this.streetZPositionValue],
