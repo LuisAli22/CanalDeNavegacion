@@ -57,7 +57,7 @@ var RiverMap;
     };
     RiverMap.prototype.setPositionsAndUpdate = function (initialPosition, endPosition) {
         var clickedPointIndex = this.getControlPointClicked(initialPosition);
-        if (clickedPointIndex !== FARFROMANYCONTROLPOINT) {
+        if (clickedPointIndex !== FARFROMANYPOINT) {
             this.controlPoints[clickedPointIndex] = [endPosition[0], 0, endPosition[1]];
         }
     };

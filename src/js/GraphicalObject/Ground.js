@@ -6,7 +6,7 @@ var Ground;
         this.graphicContainer = graphicContainer;
         this.bottomRiverUnseted = true;
         this.levelControlPointsAmount = 8;
-        this.riverWidth = 15;
+        this.riverWidth = 25;
         this.riverDepthStep = -2 * (controlValues.ph1) / this.levelControlPointsAmount;
         this.sandDistance = 2;
         this.grassVertexAmountInABank = 20;

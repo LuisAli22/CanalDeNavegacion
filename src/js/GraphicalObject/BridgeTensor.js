@@ -23,13 +23,9 @@ var BridgeTensor;
         calculator.storePositionsTangentNormalAndBinormal(geometry, this.levelGeometry);
     };
     BridgeTensor.prototype.draw = function (modelViewMatrix) {
-        var mvStack = ModelViewMatrixStack.getInstance();
-        mvStack.push(modelViewMatrix);
-        /*mat4.scale(modelViewMatrix, modelViewMatrix, vec3.fromValues(1, TOWERSCALEFACTOR, 1));
-         mat4.scale(modelViewMatrix, modelViewMatrix, vec3.fromValues(1, TOWERSCALEFACTOR, 1));
-         mat4.scale(modelViewMatrix, modelViewMatrix, vec3.fromValues(1, TOWERSCALEFACTOR, 1));
-         mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(0, 1, 0));*/
+        /*var mvStack = ModelViewMatrixStack.getInstance();
+         mvStack.push(modelViewMatrix);*/
         this.sweptSurface.draw(modelViewMatrix);
-        mat4.copy(modelViewMatrix, mvStack.pop());
+        //mat4.copy(modelViewMatrix, mvStack.pop());
     };
 }());
