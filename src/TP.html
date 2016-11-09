@@ -14,6 +14,12 @@
     <script type="text/javascript" src="js/TextureHandler.js"></script>
     <script type="text/javascript" src="js/Definitions/Definitions.js"></script>
     <script type="text/javascript" src="js/Camera/MouseController.js"></script>
+    <script type="text/javascript" src="js/Camera/KeyboardController.js"></script>
+    <script type="text/javascript" src="js/Camera/MoveBackward.js"></script>
+    <script type="text/javascript" src="js/Camera/MoveForward.js"></script>
+    <script type="text/javascript" src="js/Camera/MoveRight.js"></script>
+    <script type="text/javascript" src="js/Camera/MoveLeft.js"></script>
+    <script type="text/javascript" src="js/Camera/ToogleCamera.js"></script>
     <script type="text/javascript" src="js/Shader/Compiler.js"></script>
     <script type="text/javascript" src="js/Shader/Linker.js"></script>
     <script type="text/javascript" src="js/ModelViewMatrixStack.js"></script>
@@ -47,6 +53,7 @@
     <script type="text/javascript" src="js/GraphicalObject/TreeTrunk.js"></script>
     <script type="text/javascript" src="js/Camera/Camera.js"></script>
     <script type="text/javascript" src="js/Camera/Orbital.js"></script>
+    <script type="text/javascript" src="js/Camera/PedestrianCamera.js"></script>
     <script type="text/javascript" src="js/AnimationFrame/RiverMap.js"></script>
     <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -115,6 +122,7 @@
     <script type="text/javascript">
         var scene;
         var riverMap;
+        var keyboardController;
         var controlValues = {
             alturaMaxima: 10,
             reiniciar: function () {
@@ -141,6 +149,7 @@
         }
         function refreshScene() {
             scene = new Scene(riverMap);
+            keyboardController = new KeyboardController(scene);
             scene.tick();
         }
     </script>

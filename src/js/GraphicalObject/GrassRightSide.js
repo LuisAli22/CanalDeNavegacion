@@ -2,8 +2,8 @@
 var GrassRightSide;
 (function () {
     "use strict";
-    GrassRightSide = function (graphicContainer, sandPositions, levelControlPointsAmount, sandDistance) {
-        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 0, sandDistance);
+    GrassRightSide = function (graphicContainer, sandPositions, levelControlPointsAmount, sandDistance, streetWidth) {
+        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 0, sandDistance, streetWidth);
     };
     GrassRightSide.prototype = Object.create(Grass.prototype);
     GrassRightSide.prototype.constructor = Grass;
@@ -15,7 +15,9 @@ var GrassRightSide;
         if (coinValue === 7) {
             var upperXLimit = Math.ceil(this.sandPositions[index]);
             var xRandomValue = Math.floor((Math.random() * (upperXLimit - this.grassLimit)) + this.grassLimit);
-            this.treesPositions.push([xRandomValue, y + this.sandDistance, z]);
+            if ((z > (this.streetZPositionValue + this.streetWidth / 2)) || (z < this.streetZPositionValue - this.streetWidth / 2)) {
+                this.treesPositions.push([xRandomValue, y + this.sandDistance, z]);
+            }
         }
     };
     GrassRightSide.prototype.addBankPoints = function (index) {

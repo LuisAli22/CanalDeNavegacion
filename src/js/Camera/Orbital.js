@@ -1,15 +1,13 @@
-/*jslint browser: true*/
 /*global  Camera, MOUSESENSITIVENESS, MINIMUMRADIUS, MAXIMUMRADIUS */
 /*global $, THETAMIN, THETAMAX, YCOORDINATE,XCOORDINATE, ZOOMINSTEP, ZOOMOUTSTEP, vec3, PHIMIN, PHIMAX, console*/
 var Orbital;
 (function () {
     "use strict";
-    Orbital = function (sceneGraphicContainer, mouseController) {
-        Camera.call(this, sceneGraphicContainer, mouseController);
-        this.radius = 100;
-        this.theta = 0.39 * Math.PI;
-        this.phi = 1.6 * Math.PI;
-        this.update();
+    Orbital = function (sceneGraphicContainer, radius, theta, phi) {
+        Camera.call(this, sceneGraphicContainer);
+        this.radius = radius;
+        this.theta = theta;
+        this.phi = phi;
     };
     Orbital.prototype = Object.create(Camera.prototype);
     Orbital.prototype.constructor = Orbital;
@@ -39,10 +37,13 @@ var Orbital;
     Orbital.prototype.onWheel = function (event) {
         this.updateRadius(event.deltaY);
     };
-    Orbital.prototype.setViewDirection = function () {
+    Orbital.prototype.setTargetAnEyePositions = function () {
+        this.eye = this.getSpatialCoordinate();
+    };
+    Orbital.prototype.getSpatialCoordinate = function () {
         var x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);
         var y = this.radius * Math.cos(this.theta);
         var z = this.radius * Math.sin(this.theta) * Math.sin(this.phi);
-        vec3.set(this.eye, x, y, z);
+        return vec3.fromValues(x, y, z);
     };
 }());

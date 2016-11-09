@@ -7,6 +7,7 @@ var Ground;
         this.bottomRiverUnseted = true;
         this.levelControlPointsAmount = 8;
         this.riverWidth = 25;
+        this.streetWidth = 4.5;
         this.riverDepthStep = -2 * (controlValues.ph1) / this.levelControlPointsAmount;
         this.sandDistance = 2;
         this.grassVertexAmountInABank = 20;
@@ -20,9 +21,9 @@ var Ground;
         this.waterTexture = this.textureHandler.initializeTexture("img/water.jpg");
         this.sand = new SweptSurface(graphicContainer, this.riverLevelGeometry, riverMap.trajectory, [0xff, 0xff, 0x66]);
         this.water = new SweptSurface(graphicContainer, this.waterLevelGeometry, riverMap.trajectory, [0x33, 0x99, 0xff]);
-        this.grassRight = new GrassRightSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance);
-        this.grassLeft = new GrassLeftSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance);
-        this.street = new Street(graphicContainer, this.grassRight.getRiverIntersection(), this.grassLeft.getRiverIntersection());
+        this.grassRight = new GrassRightSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance, this.streetWidth);
+        this.grassLeft = new GrassLeftSide(graphicContainer, this.sand.getPositionBuffer(), this.levelControlPointsAmount, this.sandDistance, this.streetWidth);
+        this.street = new Street(graphicContainer, this.grassRight.getRiverIntersection(), this.grassLeft.getRiverIntersection(), this.streetWidth);
         var xLeftSide = this.grassLeft.getRiverIntersection();
         var xRightSide = this.grassRight.getRiverIntersection();
         this.bridge = new Bridge(graphicContainer, this.bottomRiver, this.riverWidth, this.street, xLeftSide, xRightSide);
@@ -32,6 +33,9 @@ var Ground;
             this.bottomRiver = y;
             this.bottomRiverUnseted = false;
         }
+    };
+    Ground.prototype.getStreet = function () {
+        return this.street;
     };
     Ground.prototype.createRiverLevelPoints = function () {
         var controlPointIndex;

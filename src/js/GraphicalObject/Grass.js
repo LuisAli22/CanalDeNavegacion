@@ -2,7 +2,7 @@
 var Grass;
 (function () {
     "use strict";
-    Grass = function (graphicContainer, sandPositions, levelControlPointsAmount, grassLimit, sandDistance) {
+    Grass = function (graphicContainer, sandPositions, levelControlPointsAmount, grassLimit, sandDistance, streetWidth) {
         GraphicalObject.call(this, graphicContainer);
         this.sandDistance = sandDistance;
         this.sandPositions = sandPositions.slice(0);
@@ -10,8 +10,8 @@ var Grass;
         this.grassLimit = grassLimit;
         this.grassVertexAmountInABank = 50;
         this.grassPositions = [];
-        this.treeScaleFactor = 3.00;
-        this.treeLevel = -0.1;
+        this.streetWidth = streetWidth;
+        this.streetZPositionValue = ((controlValues.bridgePosition / 100) * 360) - (this.streetWidth / 2);
         this.pointsPerSegment = 10;
         this.slices = 24;
         this.xRiverStop = 0;

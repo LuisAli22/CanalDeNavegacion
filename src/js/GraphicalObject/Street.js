@@ -2,19 +2,26 @@
 var Street;
 (function () {
     "use strict";
-    Street = function (graphicContainer, riverRightSideLimit, riverLeftSideLimit) {
+    Street = function (graphicContainer, riverRightSideLimit, riverLeftSideLimit, streetWidth) {
         this.riverRightSideLimit = riverRightSideLimit;
         this.riverLeftSideLimit = riverLeftSideLimit;
-        this.width = 2.5;
+        this.width = streetWidth;
         this.streetXCenter = 0;
         this.streetZPositionValue = ((controlValues.bridgePosition / 100) * 360) - (this.width / 2);
         this.streetLevelGeometry = [];
+        this.borderHeight = 0.5;
         this.createStreetLevelPoints();
         this.streetTrajectory = [];
         this.createStreetTrajectory();
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
         this.streetTexture = this.textureHandler.initializeTexture("img/street.jpg");
         this.sweptSurface = new SweptSurface(graphicContainer, this.streetLevelGeometry, this.streetTrajectory, [0xC0, 0xC0, 0xC0]);
+    };
+    Street.prototype.getZPositionValue = function () {
+        return this.streetZPositionValue;
+    };
+    Street.prototype.getBorderHeight = function () {
+        return this.borderHeight;
     };
     Street.prototype.getTrajectory = function () {
         return this.streetTrajectory.slice(0);
@@ -26,7 +33,7 @@ var Street;
         return this.streetXCenter;
     };
     Street.prototype.createStreetLevelPoints = function () {
-        var levelPointsPosition = [[0, 0, 0], [(3 / 10) * this.width, 0, 0], [this.width / 2, 0, 0], [(4 / 5) * this.width, 0, 0], [this.width, 0, 0], [this.width, 0.25, 0], [(19 / 20) * this.width, 0.25, 0], [(9 / 10) * this.width, 0.125, 0], [this.width / 2, 0.125, 0], [this.width / 10, 0.125, 0], [this.width / 20, 0.25, 0], [0, 0.25, 0], [0, 0, 0]];
+        var levelPointsPosition = [[0, 0, 0], [(3 / 10) * this.width, 0, 0], [this.width / 2, 0, 0], [(4 / 5) * this.width, 0, 0], [this.width, 0, 0], [this.width, this.borderHeight, 0], [(8 / 10) * this.width, this.borderHeight, 0], [(7 / 10) * this.width, this.borderHeight / 2, 0], [this.width / 2, this.borderHeight / 2, 0], [3 * this.width / 10, this.borderHeight / 2, 0], [2 * this.width / 10, this.borderHeight, 0], [0, this.borderHeight, 0], [0, 0, 0]];
         var calculator = Calculator.getInstance();
         calculator.storePositionsTangentNormalAndBinormal(levelPointsPosition, this.streetLevelGeometry);
     };

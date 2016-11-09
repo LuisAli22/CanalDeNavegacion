@@ -3,7 +3,7 @@ var Tree;
 (function () {
     "use strict";
     Tree = function (graphicContainer, slices, pointsPerSegment, randomize) {
-        this.randomizeFactor = 0.4;
+        this.randomizeFactor = 0.6;
         this.trunkHeight = 1.0;
         this.trunkRadius = 0.1;
         this.crownRadius = 0.6;
@@ -14,7 +14,7 @@ var Tree;
         }
     };
     Tree.prototype.randomizeSize = function () {
-        var r = 1 + Math.random() * this.randomizeFactor;
+        var r = 3 + Math.random() * this.randomizeFactor;
         this.trunkHeight *= r;
         this.trunkRadius *= r;
         this.crownRadius *= r;

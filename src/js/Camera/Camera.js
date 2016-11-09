@@ -17,7 +17,7 @@ var Camera;
     };
     Camera.prototype.update = function () {
         mat4.identity(this.lookAtMatrix);
-        this.setViewDirection();
+        this.setTargetAnEyePositions();
         mat4.lookAt(this.lookAtMatrix, this.eye, this.target, this.up);
         this.gl.uniformMatrix4fv(this.shaderProgram.ViewMatrixUniform, false, this.lookAtMatrix);
     };

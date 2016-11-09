@@ -14,32 +14,78 @@ var Bridge;
         this.towerXPosition = street.getStreetXCenter() - (this.riverWidth / 2);
         this.streetWidth = street.getWidth();
         this.streetTrajectory = street.getTrajectory();
+        this.streetBorderHeight = street.getBorderHeight();
         this.towerTh1 = 0;
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
         this.texture = this.textureHandler.initializeTexture("img/bridge.jpg");
         this.leftSideTensorTrajectory = [];
         this.rightSideTensorTrajectory = [];
+        this.secondaryTensors = [];
         this.towerWidth = 0;
         this.towers = this.initTowers();
         this.middleTensors = this.createMiddleTensors();
         this.tensor1 = new BridgeTensor(graphicContainer, this.leftSideTensorTrajectory);
         this.tensor2 = new BridgeTensor(graphicContainer, this.rightSideTensorTrajectory);
     };
+    Bridge.prototype.createCurve = function (trajectory, controlPoints) {
+        var bSpline = new Bspline(controlPoints, 5, [0, 0, 1]);
+        var curvePoints = bSpline.getCurvePoints();
+        curvePoints.forEach(function (element) {
+            trajectory.push(element);
+        }, this);
+    };
     Bridge.prototype.createTensorTrajectory = function (tensorXbegin, tensorTrajectory, signOrientation) {
         var xBegin = tensorXbegin;
         var yBegin = 1;
         var z = this.towerZPosition;
-        var xEnd = this.towerXPosition - this.towerWidth / 2;
+        var xEnd = this.towerXPosition - (this.towerWidth / 2);
         var yEnd = this.height;
         var xWidthFromBeginToTower = Math.abs(xEnd - xBegin);
         var yHeightFromLevel0ToTopTower = yEnd - yBegin;
         var controlPoints = [[xBegin, yBegin, z], [xBegin + (signOrientation * (xWidthFromBeginToTower / 2)), yBegin, z], [xEnd, yBegin + yHeightFromLevel0ToTopTower / 2, z], [xEnd, yEnd, z]];
         controlPoints.push([xEnd, yEnd, z]);
-        var bSpline = new Bspline(controlPoints, 5, [0, 0, 1]);
-        var curvePoints = bSpline.getCurvePoints();
-        curvePoints.forEach(function (element) {
-            tensorTrajectory.push(element);
-        }, this);
+        this.createCurve(tensorTrajectory, controlPoints);
+    };
+    Bridge.prototype.findPrimaryTensorIntersection = function (middleTensorTrajectory, secondaryXPosition) {
+        var middleTensorIndex;
+        for (middleTensorIndex = 0; middleTensorIndex < middleTensorTrajectory.length; middleTensorIndex += 1) {
+            if (Math.abs(middleTensorTrajectory[middleTensorIndex].position[0] - secondaryXPosition) < 0.3) {
+                return middleTensorTrajectory[middleTensorIndex].position[1];
+            }
+        }
+        return FARFROMANYPOINT;
+    };
+    Bridge.prototype.createSecondaryTensorTrajectory = function (middleTensorTrajectory, secondaryXPosition) {
+        var tensorTrajectory = [];
+        var y = this.towerTh1 + this.streetBorderHeight;
+        var yEnd = this.findPrimaryTensorIntersection(middleTensorTrajectory, secondaryXPosition);
+        if (yEnd !== FARFROMANYPOINT) {
+            var controlPointsAmount = 5;
+            var yStep = (yEnd - y) / controlPointsAmount;
+            var controlPointIndex;
+            var controlPoints = [];
+            for (controlPointIndex = 0; controlPointIndex <= controlPointsAmount; controlPointIndex += 1) {
+                controlPoints.push([secondaryXPosition, y + (controlPointIndex * yStep), this.towerZPosition]);
+            }
+            this.createCurve(tensorTrajectory, controlPoints);
+        }
+        return tensorTrajectory.slice(0);
+    };
+    Bridge.prototype.createSecondaryTensors = function (middleTensorTrajectory) {
+        var beginPosition = middleTensorTrajectory[0].position;
+        var endPosition = middleTensorTrajectory[middleTensorTrajectory.length - 1].position;
+        var xMiddleTensorBegin = beginPosition[0];
+        var xMiddleTensorEnd = endPosition[0];
+        var middleTensorWidth = xMiddleTensorEnd - xMiddleTensorBegin;
+        var secondaryTensorAmount = (middleTensorWidth / controlValues.s1);
+        var secondaryTensorIndex;
+        var secondaryTensorTrajectory = [];
+        var secondaryTensorXPosition;
+        for (secondaryTensorIndex = 0; secondaryTensorIndex < secondaryTensorAmount; secondaryTensorIndex += 1) {
+            secondaryTensorXPosition = xMiddleTensorBegin + (secondaryTensorIndex * controlValues.s1);
+            secondaryTensorTrajectory = this.createSecondaryTensorTrajectory(middleTensorTrajectory, secondaryTensorXPosition);
+            this.secondaryTensors.push(new BridgeTensor(this.graphicContainer, secondaryTensorTrajectory));
+        }
     };
     Bridge.prototype.findTowerStreetIntersection = function () {
         var indexStreet;
@@ -119,11 +165,7 @@ var Bridge;
         var xWidth = Math.abs(xEnd - xBegin);
         var yHeight = yBegin - 1;
         var controlPoints = [[xBegin, yBegin, z], [xBegin, this.towerTh1 + 1 + (3 * yHeight / 4), z], [xBegin + (xWidth / 4), this.towerTh1 + 1, z], [xBegin + (xWidth / 2), this.towerTh1 + 1, z], [xBegin + (3 * xWidth / 4), this.towerTh1 + 1, z], [xEnd, this.towerTh1 + 1 + (3 * yHeight / 4), z], [xEnd, yEnd, z]];
-        var bSpline = new Bspline(controlPoints, 5, [0, 0, 1]);
-        var curvePoints = bSpline.getCurvePoints();
-        curvePoints.forEach(function (element) {
-            middleTensorTrajectory.push(element);
-        }, this);
+        this.createCurve(middleTensorTrajectory, controlPoints);
         return middleTensorTrajectory.slice(0);
     };
     Bridge.prototype.createMiddleTensors = function () {
@@ -134,6 +176,7 @@ var Bridge;
                 var xBegin = neighborTower.getXPosition() - (neighborTower.getWidth() / 2);
                 var xEnd = tower.getXPosition() - (neighborTower.getWidth() / 2);
                 var middleTensorTrajectory = this.createMiddleTensorTrajectory(xBegin, xEnd);
+                this.createSecondaryTensors(middleTensorTrajectory);
                 middleTensors.push(new BridgeTensor(this.graphicContainer, middleTensorTrajectory));
             }
         }, this);
@@ -157,9 +200,15 @@ var Bridge;
             mat4.copy(modelViewMatrix, mvStack.pop());
         }, this);
     };
+    Bridge.prototype.drawSecondaryTensors = function (modelViewMatrix) {
+        this.secondaryTensors.forEach(function (secondaryTensor) {
+            secondaryTensor.draw(modelViewMatrix);
+        }, this);
+    };
     Bridge.prototype.draw = function (modelViewMatrix) {
         this.textureHandler.setTextureUniform(this.texture);
         this.drawTowersAndExtremeTensors(modelViewMatrix);
         this.drawMiddleTensors(modelViewMatrix);
+        this.drawSecondaryTensors(modelViewMatrix);
     };
 }());
