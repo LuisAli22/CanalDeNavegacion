@@ -31,4 +31,15 @@ var ThreeDimensionRenderingContext;
         var linker = new Linker(vertexShader, fragmentShader, this.shaderProgram, this.gl);
         linker.start();
     };
+    ThreeDimensionRenderingContext.prototype.setMaterialUniforms = function (ka, kd, ks) {
+        this.gl.uniform3fv(this.shaderProgram.materialKa, ka);
+        this.gl.uniform3fv(this.shaderProgram.materialKd, kd);
+        this.gl.uniform3fv(this.shaderProgram.materialKs, ks);
+    };
+    ThreeDimensionRenderingContext.prototype.setMatrixUniforms = function (modelViewMatrix) {
+        this.gl.uniformMatrix4fv(this.shaderProgram.mvMatrixUniform, false, modelViewMatrix);
+        var normalMatrix = mat3.create();
+        mat3.normalFromMat4(normalMatrix, modelViewMatrix);
+        this.gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
+    };
 }());

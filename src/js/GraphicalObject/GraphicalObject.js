@@ -72,7 +72,6 @@ var GraphicalObject;
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_color_buffer);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, this.webgl_color_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         if (this.webgl_tangent_buffer !== null) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
@@ -88,17 +87,10 @@ var GraphicalObject;
             this.gl.vertexAttribPointer(this.shaderProgram.vertexBinormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         }
     };
-    GraphicalObject.prototype.setModelMatrixNormalMatrixAndSamplerToShaderProgram = function (modelViewMatrix) {
-        this.gl.uniformMatrix4fv(this.shaderProgram.ModelMatrixUniform, false, modelViewMatrix);
-        var normalMatrix = mat3.create();
-        mat3.fromMat4(normalMatrix, modelViewMatrix);
-        mat3.invert(normalMatrix, normalMatrix);
-        mat3.transpose(normalMatrix, normalMatrix);
-        this.gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
-    };
     GraphicalObject.prototype.draw = function (modelViewMatrix) {
         this.defineGenericVertexAtributeArray();
-        this.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
+        //this.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
+        this.graphicContainer.setMatrixUniforms(modelViewMatrix);
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
     };

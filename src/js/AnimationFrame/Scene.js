@@ -64,31 +64,29 @@ var Scene;
         this.camera.update();
     };
     Scene.prototype.configureLighting = function () {
-        var lighting = 0;
-        this.gl.uniform3f(this.shaderProgram.ambientColorUniform, 0.1, 0.1, 0.1);
-        this.gl.uniform3f(this.shaderProgram.directionalColorUniform, 0.12, 0.12, 0.10);
-        this.gl.uniform1i(this.shaderProgram.useLightingUniform, lighting);
+        var cameraMatrix = this.camera.getMatrix();
+        var lightPosition = vec3.fromValues(0.0, 250.0, 100.0);
+        this.gl.uniformMatrix4fv(this.shaderProgram.inverseVMatrixUniform, false, mat4.invert(mat4.create(), cameraMatrix));
+        vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
 
-        var lightPosition = vec3.fromValues(-100, 100, 100);
-        /*var cameraMatrix = this.camera.getMatrix();
-         vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
-         vec3.transformMat4(lightPosition, lightPosition, this.modelViewMatrix);*/
-        this.gl.uniform3fv(this.shaderProgram.lightingDirectionUniform, lightPosition);
-        /*this.gl.uniform3f(this.shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
-         this.gl.uniform3f(this.shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5);*/
+        this.gl.uniform3fv(this.shaderProgram.lightingPositionUniform, lightPosition);
+        this.gl.uniform3fv(this.shaderProgram.lightLa, [1.0, 1.0, 1.0]);
+        this.gl.uniform3fv(this.shaderProgram.lightLd, [1.0, 1.0, 1.0]);
+        this.gl.uniform3fv(this.shaderProgram.lightLs, [1.0, 1.0, 1.0]);
+        mat4.identity(this.modelViewMatrix);
+        mat4.multiply(this.modelViewMatrix, this.modelViewMatrix, cameraMatrix);
     };
     Scene.prototype.draw = function () {
-        this.gl.uniform1i(this.shaderProgram.useTextureUniform, 1);
         this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.configureProjectionMatrix();
         this.drawObject();
     };
     Scene.prototype.drawObject = function () {
+        this.configureLighting();
         var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(this.modelViewMatrix);
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(-1 * this.riverMapCenter[0], 0, -1 * this.riverMapCenter[1]));
-        this.configureLighting();
         this.ground.draw(this.modelViewMatrix);
         mat4.copy(this.modelViewMatrix, mvStack.pop());
     };

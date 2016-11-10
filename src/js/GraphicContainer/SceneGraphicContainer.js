@@ -14,4 +14,10 @@ var SceneGraphicContainer;
     SceneGraphicContainer.prototype.getShaderProgram = function () {
         return this.gl.getShaderProgram();
     };
+    SceneGraphicContainer.prototype.setMaterialUniforms = function (ka, kd, ks) {
+        this.gl.setMaterialUniforms(ka, kd, ks);
+    };
+    SceneGraphicContainer.prototype.setMatrixUniforms = function (modelViewMatrix) {
+        this.gl.setMatrixUniforms(modelViewMatrix);
+    };
 }());

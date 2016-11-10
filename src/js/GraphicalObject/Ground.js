@@ -27,6 +27,9 @@ var Ground;
         var xLeftSide = this.grassLeft.getRiverIntersection();
         var xRightSide = this.grassRight.getRiverIntersection();
         this.bridge = new Bridge(graphicContainer, this.bottomRiver, this.riverWidth, this.street, xLeftSide, xRightSide);
+        this.materialKa = [0.3, 0.3, 0.3];
+        this.materialKd = [0.9, 0.9, 0.9];
+        this.materialKs = [1.0, 1.0, 1.0];
     };
     Ground.prototype.recordYValueBottomRiver = function (y) {
         if (this.bottomRiverUnseted) {
@@ -80,6 +83,7 @@ var Ground;
         mvStack.push(modelViewMatrix);
         mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(0, -this.sandDistance, 0));
         this.textureHandler.setTextureUniform(this.sandTexture);
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs);
         this.sand.draw(modelViewMatrix);
         this.textureHandler.setTextureUniform(this.waterTexture);
         this.water.draw(modelViewMatrix);

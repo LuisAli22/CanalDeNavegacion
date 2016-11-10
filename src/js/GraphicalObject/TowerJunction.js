@@ -12,7 +12,7 @@ var TowerJunction;
     TowerJunction.prototype.constructor = TowerJunction;
     TowerJunction.prototype.setUpBuffers = function () {
         var i;
-        this.bufferList.position = [0, 0, 0, (1 / 2.3), 0, 0, (1 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, 0, 1, 0, 0, 1, 0, 1, (1.3 / 2.3), 0, 1, (1.3 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, 1, 0, 0, 1, 0, 0, 0, (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3), (0.15 / 2.3), this.junctionHeight, (0.85 / 2.3), (0.85 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.06 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.06 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.06 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.06 / 2.3), this.junctionHeight, (1.55 / 2.3), (0.85 / 2.3), this.junctionHeight, (1.55 / 2.3), (0.85 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3)];
+        this.bufferList.position = [0, 0, 0, (1 / 2.3), 0, 0, (1 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, 0, 1, 0, 0, 1, 0, 1, (1.3 / 2.3), 0, 1, (1.3 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, 1, 0, 0, 1, 0, 0, 0, (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3), (1 / 2.3), this.junctionHeight, (0.15 / 2.3), (1 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.3 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.3 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.3 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.3 / 2.3), this.junctionHeight, (1.55 / 2.3), (1 / 2.3), this.junctionHeight, (1.55 / 2.3), (1 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3)];
         var levelPointAmount = this.bufferList.position.length / 2;
         var tangent;
         var currentPosition;
@@ -20,6 +20,9 @@ var TowerJunction;
         var normal;
         var binormal;
         var currentPositionLevel1;
+        var u = 0;
+        var v = 0;
+        var uStep = 1 / (levelPointAmount - 1);
         var index;
         for (i = 0; i < levelPointAmount; i += 3) {
             currentPosition = vec3.fromValues(this.bufferList.position[i], this.bufferList.position[i + 1], this.bufferList.position[i + 2]);
@@ -32,18 +35,23 @@ var TowerJunction;
             this.bufferList.normal.push(normal[0], normal[1], normal[2]);
             this.bufferList.binormal.push(binormal[0], binormal[1], binormal[2]);
             this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
-            this.bufferList.texture_coord.push(1, 1);
+            this.bufferList.texture_coord.push(u, v);
+            u = i * uStep;
         }
         tangent = this.bufferList.tangent.slice(0);
         normal = this.bufferList.normal.slice(0);
         binormal = this.bufferList.binormal.slice(0);
+        u = 0;
+        v = 1;
+        uStep = 1 / (this.bufferList.position.length - 1);
         for (i = levelPointAmount; i < this.bufferList.position.length; i += 3) {
             index = (i % levelPointAmount);
             this.bufferList.tangent.push(tangent[index], tangent[index + 1], tangent[index + 2]);
             this.bufferList.normal.push(normal[index], normal[index + 1], normal[index + 2]);
             this.bufferList.binormal.push(binormal[index], binormal[index + 1], binormal[index + 2]);
             this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
-            this.bufferList.texture_coord.push(1, 1);
+            this.bufferList.texture_coord.push(u, v);
+            u = i * uStep;
         }
         this.loadIndexData((levelPointAmount - 3) / 3, 2);
         this.bindBuffers();

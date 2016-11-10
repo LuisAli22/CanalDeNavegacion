@@ -2,22 +2,22 @@
 var BridgeTensor;
 (function () {
     "use strict";
-    BridgeTensor = function (graphicContainer, trajectory) {
+    BridgeTensor = function (graphicContainer, trajectory, radius) {
+        this.radius = radius;
         this.levelGeometry = [];
         this.createLevelGeometry();
         this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory, [0xFF, 0x00, 0x00]);
     };
     BridgeTensor.prototype.createLevelGeometry = function () {
         var angle = 0;
-        var radius = 0.125;
         var geometry = [];
         var x;
         var y;
         var calculator = Calculator.getInstance();
         var stepAngle = Math.PI / 24;
         for (angle = 0; angle <= 2 * Math.PI; angle += stepAngle) {
-            x = radius * Math.cos(angle);
-            y = radius * Math.sin(angle);
+            x = this.radius * Math.cos(angle);
+            y = this.radius * Math.sin(angle);
             geometry.push(vec3.fromValues(x, y, 0));
         }
         calculator.storePositionsTangentNormalAndBinormal(geometry, this.levelGeometry);
