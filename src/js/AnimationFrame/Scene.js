@@ -1,6 +1,7 @@
 /*jslint browser: true*/
 /*global SceneGraphicContainer, Cylinder,Orbital, Camera, mat4,AnimationFrame*/
 /*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, TextureHandler, Ground, TreeTrunk, riverMap, vec2, PedestrianCamera*/
+/*global SCENESCALEFACTOR*/
 var Scene;
 (function () {
     "use strict";
@@ -65,7 +66,7 @@ var Scene;
     };
     Scene.prototype.configureLighting = function () {
         var cameraMatrix = this.camera.getMatrix();
-        var lightPosition = vec3.fromValues(0.0, 250.0, 100.0);
+        var lightPosition = vec3.fromValues(700, 500, 700);
         this.gl.uniformMatrix4fv(this.shaderProgram.inverseVMatrixUniform, false, mat4.invert(mat4.create(), cameraMatrix));
         vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
 
@@ -86,6 +87,7 @@ var Scene;
         this.configureLighting();
         var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(this.modelViewMatrix);
+        mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(SCENESCALEFACTOR, SCENESCALEFACTOR, SCENESCALEFACTOR));
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(-1 * this.riverMapCenter[0], 0, -1 * this.riverMapCenter[1]));
         this.ground.draw(this.modelViewMatrix);
         mat4.copy(this.modelViewMatrix, mvStack.pop());

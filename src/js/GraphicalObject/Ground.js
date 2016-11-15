@@ -33,7 +33,7 @@ var Ground;
     };
     Ground.prototype.recordYValueBottomRiver = function (y) {
         if (this.bottomRiverUnseted) {
-            this.bottomRiver = y;
+            this.bottomRiver = y - this.sandDistance;
             this.bottomRiverUnseted = false;
         }
     };

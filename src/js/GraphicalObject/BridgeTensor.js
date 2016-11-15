@@ -9,7 +9,7 @@ var BridgeTensor;
         this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory, [0xFF, 0x00, 0x00]);
     };
     BridgeTensor.prototype.createLevelGeometry = function () {
-        var angle = 0;
+        var angle;
         var geometry = [];
         var x;
         var y;

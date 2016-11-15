@@ -1,5 +1,5 @@
 /*global Orbital, PEDESTRIANPOSITION, RADIUSPEDESTRIANPOSITION, TITAPEDESTRIANPOSITION, FIPEDESTRIANPOSITION*/
-/*global vec3, MOVELEFT, MOVERIGHT, MOVEBACKWARD, MOVEFORWARD, vec2, riverMap*/
+/*global vec3, MOVELEFT, MOVERIGHT, MOVEBACKWARD, MOVEFORWARD, vec2, riverMap, SCENESCALEFACTOR*/
 /*global XCOORDINATE, YCOORDINATE, ZCOORDINATE, MOUSESENSITIVENESS, PHIMIN, PHIMAX, THETAMIN, THETAMAX*/
 var PedestrianCamera;
 (function () {
@@ -10,7 +10,7 @@ var PedestrianCamera;
         this.streetZPosition = street.getZPositionValue();
         this.streetWidth = street.getWidth();
         this.pedestrianPosition = PEDESTRIANPOSITION;
-        this.personHeight = 1.5;
+        this.personHeight = 1.5 * SCENESCALEFACTOR;
         this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
         this.moveAside = false;
     };

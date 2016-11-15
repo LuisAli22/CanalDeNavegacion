@@ -89,7 +89,6 @@ var GraphicalObject;
     };
     GraphicalObject.prototype.draw = function (modelViewMatrix) {
         this.defineGenericVertexAtributeArray();
-        //this.setModelMatrixNormalMatrixAndSamplerToShaderProgram(modelViewMatrix);
         this.graphicContainer.setMatrixUniforms(modelViewMatrix);
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
         this.gl.drawElements(this.gl.TRIANGLES, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);

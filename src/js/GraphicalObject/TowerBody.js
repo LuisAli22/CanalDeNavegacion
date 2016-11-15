@@ -3,7 +3,6 @@ var TowerBody;
 (function () {
     "use strict";
     TowerBody = function (graphicContainer, height) {
-        this.width = 1;
         this.height = height;
         this.towerBodyLevelGeometry = [];
         this.createLevelPoints();
@@ -11,16 +10,12 @@ var TowerBody;
         this.createTrajectory();
         this.sweptSurface = new SweptSurface(graphicContainer, this.towerBodyLevelGeometry, this.towerBodyTrajectory, [0xff, 0x00, 0x00]);
     };
-    TowerBody.prototype.getWidth = function () {
-        return this.width;
-    };
     TowerBody.prototype.createLevelPoints = function () {
-        var levelPointsPosition = [[0, 0, 0], [1 / 2.3, 0, 0], [1 / 2.3, 0.1 / 2.3, 0], [1.3 / 2.3, 0.1 / 2.3, 0], [1.3 / 2.3, 0, 0], [this.width, 0, 0], [this.width, this.width, 0], [1.3 / 2.3, this.width, 0], [1.3 / 2.3, 1.9 / 2.3, 0], [1 / 2.3, 1.9 / 2.3, 0], [1 / 2.3, this.width, 0], [0, this.width, 0], [0, 0, 0]];
         var calculator = Calculator.getInstance();
+        var levelPointsPosition = calculator.towerMainLevelGeometry(true);
         calculator.storePositionsTangentNormalAndBinormal(levelPointsPosition, this.towerBodyLevelGeometry);
     };
     TowerBody.prototype.createTrajectory = function () {
-        //var controlPoints = [[0, 0, 0], [0, 1 / 4, 0], [0, 2 / 4, 0], [0, 3 / 4, 0], [0, 1, 0]];
         var controlPoints = [];
         var heightIndex;
         var stepHeight = this.height / 3;

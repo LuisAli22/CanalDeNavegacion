@@ -1,4 +1,4 @@
-/*global vec3*/
+/*global vec3, TOWERWIDTH*/
 var Calculator = (function () {
     "use strict";
     var instance;
@@ -28,7 +28,7 @@ var Calculator = (function () {
             var binormal;
             var normal;
             if (previousPointPosition[0] === 0 && previousPointPosition[1] === 0 && previousPointPosition[2] === 0) {
-                normal = crossProductAndNormalize(tangent, vec3.fromValues(1, 0, 1));
+                normal = crossProductAndNormalize(vec3.fromValues(1, 0, 1), tangent);
                 binormal = crossProductAndNormalize(normal, tangent);
             } else {
                 binormal = crossProductAndNormalize(tangent, previousPointPosition);
@@ -71,6 +71,32 @@ var Calculator = (function () {
             } else {
                 neighbors[3] = vertexIndex - 1;
             }
+        }
+
+        function setXValue(index) {
+            if (index === 1 || index === 2 || index === 9 || index === 10) {
+                return (3 / 8) * TOWERWIDTH;
+            }
+            if (index === 3 || index === 4 || index === 7 || index === 8) {
+                return (5 / 8) * TOWERWIDTH;
+            }
+            if (index === 5 || index === 6) {
+                return TOWERWIDTH;
+            }
+            return 0;
+        }
+
+        function setYValue(index, pointsAmount) {
+            if ((index === 2) || (index === 3)) {
+                return (1 / 4) * TOWERWIDTH;
+            }
+            if ((index === 8) || (index === 9)) {
+                return (3 / 4) * TOWERWIDTH;
+            }
+            if ((index === 6) || (index === 7) || (index === 10) || (index === pointsAmount - 1)) {
+                return TOWERWIDTH;
+            }
+            return 0;
         }
         return {
             storePositionsTangentNormalAndBinormal: function (positions, geometry) {
@@ -128,6 +154,23 @@ var Calculator = (function () {
                 }
 
                 return [vec3.normalize([], binormal), vec3.normalize(vec3.create(), vec3.fromValues(n[0] / l, n[1] / l, n[2] / l)), vec3.normalize(vec3.create(), tangent)];
+            },
+            towerMainLevelGeometry: function (storeByThreeValues) {
+                var i;
+                var x;
+                var y;
+                var pointsAmount = 12;
+                var position = [];
+                for (i = 0; i <= pointsAmount; i += 1) {
+                    x = setXValue(i);
+                    y = setYValue(i, pointsAmount);
+                    if (storeByThreeValues) {
+                        position.push(vec3.fromValues(x, y, 0));
+                    } else {
+                        position.push(x, y, 0);
+                    }
+                }
+                return position.slice(0);
             }
         };
     }

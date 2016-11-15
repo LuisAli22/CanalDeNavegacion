@@ -1,18 +1,27 @@
-/*global GraphicalObject, vec3, TOWERSCALEFACTOR, TextureHandler, Calculator*/
+/*global GraphicalObject, vec3, TOWERSCALEFACTOR, TextureHandler, Calculator, ModelViewMatrixStack, mat4, TOWERWIDTH*/
 var TowerJunction;
 (function () {
     "use strict";
     TowerJunction = function (graphicContainer, color) {
         GraphicalObject.call(this, graphicContainer);
         this.color = color;
-        this.junctionHeight = 0.2;
+        this.height = 0.2;
         this.setUpBuffers();
     };
     TowerJunction.prototype = Object.create(GraphicalObject.prototype);
     TowerJunction.prototype.constructor = TowerJunction;
     TowerJunction.prototype.setUpBuffers = function () {
         var i;
-        this.bufferList.position = [0, 0, 0, (1 / 2.3), 0, 0, (1 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, (0.1 / 2.3), (1.3 / 2.3), 0, 0, 1, 0, 0, 1, 0, 1, (1.3 / 2.3), 0, 1, (1.3 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, (1.9 / 2.3), (1 / 2.3), 0, 1, 0, 0, 1, 0, 0, 0, (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3), (1 / 2.3), this.junctionHeight, (0.15 / 2.3), (1 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.3 / 2.3), this.junctionHeight, (0.36 / 2.3), (1.3 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (0.15 / 2.3), (1.76 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.3 / 2.3), this.junctionHeight, (1.76 / 2.3), (1.3 / 2.3), this.junctionHeight, (1.55 / 2.3), (1 / 2.3), this.junctionHeight, (1.55 / 2.3), (1 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (1.76 / 2.3), (0.15 / 2.3), this.junctionHeight, (0.15 / 2.3)];
+        var x;
+        var y;
+        var calculator = Calculator.getInstance();
+        this.bufferList.position = calculator.towerMainLevelGeometry(false);
+        var temporaryLength = this.bufferList.position.length;
+        for (i = 0; i < temporaryLength; i += 3) {
+            x = this.bufferList.position[i] * TOWERSCALEFACTOR + (1 / 5);
+            y = this.bufferList.position[i + 1] * TOWERSCALEFACTOR + (1 / 5);
+            this.bufferList.position.push(x, y, this.height);
+        }
         var levelPointAmount = this.bufferList.position.length / 2;
         var tangent;
         var currentPosition;
@@ -71,6 +80,14 @@ var TowerJunction;
         }
     };
     TowerJunction.prototype.getHeight = function () {
-        return this.junctionHeight;
+        return this.height;
+    };
+    TowerJunction.prototype.draw = function (modelViewMatrix) {
+        var mvStack = ModelViewMatrixStack.getInstance();
+        mvStack.push(modelViewMatrix);
+        mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(-TOWERWIDTH, 0, 0));
+        mat4.rotateX(modelViewMatrix, modelViewMatrix, -Math.PI / 2);
+        GraphicalObject.prototype.draw.call(this, modelViewMatrix);
+        mat4.copy(modelViewMatrix, mvStack.pop());
     };
 }());
