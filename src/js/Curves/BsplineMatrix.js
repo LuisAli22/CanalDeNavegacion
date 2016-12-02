@@ -1,4 +1,4 @@
-/*global mat4, vec4*/
+/*global mat4, vec4, Calculator*/
 var BsplineMatrix = (function () {
     "use strict";
     var instance;
@@ -16,25 +16,10 @@ var BsplineMatrix = (function () {
         var bSplineMatrix = createBsplineMatrix();
         var controPointsAndBsplineMatrixSubproduct;
 
-        function multiplyMatrixByVector(controlPoints) {
-            var product = vec4.create();
-            var addition = 0;
-            bSplineMatrix.forEach(function (element, index) {
-                if (((index % 4) === 0) && (index !== 0)) {
-                    product[Math.floor((index - 1) / 4)] = addition;
-                    addition = 0;
-                }
-                addition += element * controlPoints[index % 4];
-                if (index === bSplineMatrix.length - 1) {
-                    product[Math.floor((index) / 4)] = addition;
-                }
-            });
-            return product;
-        }
-
         return {
             multiplyByVector: function (controlPoints) {
-                controPointsAndBsplineMatrixSubproduct = multiplyMatrixByVector(controlPoints);
+                var calculator = Calculator.getInstance();
+                controPointsAndBsplineMatrixSubproduct = calculator.multiplyMatrixByVector(bSplineMatrix, controlPoints);
             },
             getCurvePoint: function (u, getCoordinateValue) {
                 var canonicalBasis = vec4.create();
@@ -43,7 +28,7 @@ var BsplineMatrix = (function () {
                 } else {
                     vec4.set(canonicalBasis, 3 * Math.pow(u, 2), 2 * u, 1, 0);
                 }
-                return vec4.dot(canonicalBasis, controPointsAndBsplineMatrixSubproduct);
+                return Math.round(vec4.dot(canonicalBasis, controPointsAndBsplineMatrixSubproduct) * 1000) / 1000;
             }
         };
     }

@@ -1,7 +1,7 @@
 /*jslint browser: true*/
 /*global SceneGraphicContainer, Cylinder,Orbital, Camera, mat4,AnimationFrame*/
 /*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, TextureHandler, Ground, TreeTrunk, riverMap, vec2, PedestrianCamera*/
-/*global SCENESCALEFACTOR*/
+/*global SCENESCALEFACTOR, Sky*/
 var Scene;
 (function () {
     "use strict";
@@ -15,15 +15,21 @@ var Scene;
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.modelViewMatrix = mat4.create();
-        this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
-        this.ground = new Ground(this.graphicContainer, riverMap, this.riverMapCenter);
-        this.cameras = [new Orbital(this.graphicContainer, 100, 0.39 * Math.PI, 1.6 * Math.PI), new PedestrianCamera(this.graphicContainer, this.ground.getStreet())];
-        this.currentCameraIndex = 0;
-        this.camera = this.cameras[this.currentCameraIndex];
-        this.camera.update();
     };
     Scene.prototype = Object.create(AnimationFrame.prototype);
     Scene.prototype.constructor = Scene;
+    Scene.prototype.createSkyGroundAndCamera = function () {
+        this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
+        this.sky = new Sky(this.graphicContainer);
+        this.ground = new Ground(this.graphicContainer, riverMap);
+        this.cameras = {
+            "Orbital": new Orbital(this.graphicContainer, 500, 0.39 * Math.PI, 1.6 * Math.PI),
+            "Pedestrian": new PedestrianCamera(this.graphicContainer, this.ground.getStreet())
+        };
+        this.currentCameraIndex = "Orbital";
+        this.camera = this.cameras[this.currentCameraIndex];
+        this.camera.update();
+    };
     Scene.prototype.setPositionsAndUpdate = function (initialPosition, endPosition) {
         this.camera.setPositionsAndUpdate(initialPosition, endPosition);
     };
@@ -37,7 +43,7 @@ var Scene;
         this.gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.projectionMatrix);
     };
     Scene.prototype.currentCameraIsPedestrianCam = function () {
-        return (this.currentCameraIndex % 2 === 1);
+        return (this.currentCameraIndex === "Pedestrian");
     };
     Scene.prototype.moveBackward = function () {
         if (this.currentCameraIsPedestrianCam()) {
@@ -60,13 +66,17 @@ var Scene;
         }
     };
     Scene.prototype.toogleCamera = function () {
-        this.currentCameraIndex += 1;
-        this.camera = this.cameras[this.currentCameraIndex % 2];
+        if (this.currentCameraIndex === "Orbital") {
+            this.currentCameraIndex = "Pedestrian";
+        } else {
+            this.currentCameraIndex = "Orbital";
+        }
+        this.camera = this.cameras[this.currentCameraIndex];
         this.camera.update();
     };
     Scene.prototype.configureLighting = function () {
         var cameraMatrix = this.camera.getMatrix();
-        var lightPosition = vec3.fromValues(700, 500, 700);
+        var lightPosition = vec3.fromValues(-720, 800, -600);
         this.gl.uniformMatrix4fv(this.shaderProgram.inverseVMatrixUniform, false, mat4.invert(mat4.create(), cameraMatrix));
         vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
 
@@ -85,6 +95,7 @@ var Scene;
     };
     Scene.prototype.drawObject = function () {
         this.configureLighting();
+        this.sky.draw(this.modelViewMatrix);
         var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(this.modelViewMatrix);
         mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(SCENESCALEFACTOR, SCENESCALEFACTOR, SCENESCALEFACTOR));

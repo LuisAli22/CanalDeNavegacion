@@ -31,10 +31,11 @@ var ThreeDimensionRenderingContext;
         var linker = new Linker(vertexShader, fragmentShader, this.shaderProgram, this.gl);
         linker.start();
     };
-    ThreeDimensionRenderingContext.prototype.setMaterialUniforms = function (ka, kd, ks) {
+    ThreeDimensionRenderingContext.prototype.setMaterialUniforms = function (ka, kd, ks, shininess) {
         this.gl.uniform3fv(this.shaderProgram.materialKa, ka);
         this.gl.uniform3fv(this.shaderProgram.materialKd, kd);
         this.gl.uniform3fv(this.shaderProgram.materialKs, ks);
+        this.gl.uniform1f(this.shaderProgram.materialShininess, shininess);
     };
     ThreeDimensionRenderingContext.prototype.setMatrixUniforms = function (modelViewMatrix) {
         this.gl.uniformMatrix4fv(this.shaderProgram.mvMatrixUniform, false, modelViewMatrix);

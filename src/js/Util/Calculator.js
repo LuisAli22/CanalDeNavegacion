@@ -1,4 +1,4 @@
-/*global vec3, TOWERWIDTH*/
+/*global vec3, vec4, TOWERWIDTH*/
 var Calculator = (function () {
     "use strict";
     var instance;
@@ -31,7 +31,7 @@ var Calculator = (function () {
                 normal = crossProductAndNormalize(vec3.fromValues(1, 0, 1), tangent);
                 binormal = crossProductAndNormalize(normal, tangent);
             } else {
-                binormal = crossProductAndNormalize(tangent, previousPointPosition);
+                binormal = crossProductAndNormalize(previousPointPosition, tangent);//(tangent, previousPointPosition);
                 normal = crossProductAndNormalize(binormal, tangent);
             }
             geometry.push({
@@ -98,6 +98,20 @@ var Calculator = (function () {
             }
             return 0;
         }
+
+        function createBinormalXSense(index) {
+            if ((index === 0) || (index === 3) || (index === 4) || (index === 7) || (index === 8) || (index === 11) || (index === 12)) {
+                return vec3.fromValues(-1, 0, 0).slice(0);
+            }
+            return vec3.fromValues(1, 0, 0).slice(0);
+        }
+
+        function createBinormalYSense(index) {
+            if ((index <= 5) || (index === 12)) {
+                return vec3.fromValues(0, -1, 0).slice(0);
+            }
+            return vec3.fromValues(0, 1, 0).slice(0);
+        }
         return {
             storePositionsTangentNormalAndBinormal: function (positions, geometry) {
                 var previousPointPosition = vec3.create();
@@ -160,17 +174,57 @@ var Calculator = (function () {
                 var x;
                 var y;
                 var pointsAmount = 12;
-                var position = [];
+                var geometry = [];
+                var binormal1;
+                var binormal2;
                 for (i = 0; i <= pointsAmount; i += 1) {
                     x = setXValue(i);
                     y = setYValue(i, pointsAmount);
+                    binormal1 = createBinormalXSense(i);
+                    binormal2 = createBinormalYSense(i);
+                    /*geometry.push({"position": vec3.fromValues(x, y, 0), "binormal": binormal2, "normal": null, "tangent": null});
+                     geometry.push({"position": vec3.fromValues(x, y, 0), "binormal": binormal1, "normal": null, "tangent": null});*/
                     if (storeByThreeValues) {
-                        position.push(vec3.fromValues(x, y, 0));
+                        /*binormal1 = createBinormalXSense(i);
+                         binormal2 = createBinormalYSense(i);*/
+                        geometry.push({
+                            "position": vec3.fromValues(x, y, 0),
+                            "binormal": binormal2,
+                            "normal": null,
+                            "tangent": null
+                        });
+                        geometry.push({
+                            "position": vec3.fromValues(x, y, 0),
+                            "binormal": binormal1,
+                            "normal": null,
+                            "tangent": null
+                        });
                     } else {
-                        position.push(x, y, 0);
+                        //geometry.push(x, y, 0);
+                        geometry.push({
+                            "position": vec3.fromValues(x, y, 0),
+                            "binormal": binormal1,
+                            "normal": null,
+                            "tangent": null
+                        });
                     }
                 }
-                return position.slice(0);
+                return geometry.slice(0);
+            },
+            multiplyMatrixByVector: function (matrix, vector) {
+                var product = vec4.create();
+                var addition = 0;
+                matrix.forEach(function (element, index) {
+                    if (((index % 4) === 0) && (index !== 0)) {
+                        product[Math.floor((index - 1) / 4)] = addition;
+                        addition = 0;
+                    }
+                    addition += element * vector[index % 4];
+                    if (index === matrix.length - 1) {
+                        product[Math.floor((index) / 4)] = addition;
+                    }
+                });
+                return product.slice(0);
             }
         };
     }

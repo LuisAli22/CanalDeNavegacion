@@ -2,8 +2,8 @@
 var GrassRightSide;
 (function () {
     "use strict";
-    GrassRightSide = function (graphicContainer, sandPositions, levelControlPointsAmount, sandDistance, streetWidth) {
-        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 0, sandDistance, streetWidth);
+    GrassRightSide = function (graphicContainer, sandPositions, levelControlPointsAmount, streetWidth) {
+        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 0, streetWidth);
     };
     GrassRightSide.prototype = Object.create(Grass.prototype);
     GrassRightSide.prototype.constructor = Grass;
@@ -16,7 +16,7 @@ var GrassRightSide;
             var upperXLimit = Math.ceil(this.sandPositions[index]);
             var xRandomValue = Math.floor((Math.random() * (upperXLimit - this.grassLimit)) + this.grassLimit);
             if ((z > (this.streetZPositionValue + this.streetWidth / 2)) || (z < this.streetZPositionValue - this.streetWidth / 2)) {
-                this.treesPositions.push([xRandomValue, y + this.sandDistance, z]);
+                this.treesPositions.push([xRandomValue, y, z]);
             }
         }
     };
@@ -28,11 +28,11 @@ var GrassRightSide;
         var currentIndex;
         var currentLastPoint;
         if (stepDistanceBetweenVertex > 0) {
-            this.grassPositions.push(vec3.fromValues(xCoordinate, y + this.sandDistance, z));
+            this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
             this.createRandomTree(index, y, z);
             for (currentIndex = 0; currentIndex < this.grassVertexAmountInABank - 2; currentIndex += 1) {
                 xCoordinate += stepDistanceBetweenVertex;
-                this.grassPositions.push(vec3.fromValues(xCoordinate, y + this.sandDistance, z));
+                this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
             }
             currentLastPoint = this.grassPositions[this.grassPositions.length - 1];
             this.setRiverStreetIntersection(currentLastPoint[2], currentLastPoint[0], -1);

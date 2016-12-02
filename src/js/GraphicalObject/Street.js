@@ -14,8 +14,8 @@ var Street;
         this.streetTrajectory = [];
         this.createStreetTrajectory();
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.streetTexture = this.textureHandler.initializeTexture("img/street.jpg");
-        this.sweptSurface = new SweptSurface(graphicContainer, this.streetLevelGeometry, this.streetTrajectory, [0xC0, 0xC0, 0xC0]);
+        this.streetTexture = this.textureHandler.initializeTexture("img/tramo-doblemarilla.jpg");
+        this.sweptSurface = new SweptSurface(graphicContainer, this.streetLevelGeometry, this.streetTrajectory, null, false);
     };
     Street.prototype.getZPositionValue = function () {
         return this.streetZPositionValue;
@@ -93,9 +93,6 @@ var Street;
     };
     Street.prototype.draw = function (modelViewMatrix) {
         this.textureHandler.setTextureUniform(this.streetTexture);
-        var mvStack = ModelViewMatrixStack.getInstance();
-        mvStack.push(modelViewMatrix);
         this.sweptSurface.draw(modelViewMatrix);
-        mat4.copy(modelViewMatrix, mvStack.pop());
     };
 }());

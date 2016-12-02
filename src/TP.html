@@ -35,6 +35,7 @@
     <script type="text/javascript" src="js/AnimationFrame/Scene.js"></script>
 
     <script type="text/javascript" src="js/GraphicalObject/GraphicalObject.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Cube.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Cylinder.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/SweptSurface.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/RevolutionSurface.js"></script>
@@ -47,7 +48,10 @@
     <script type="text/javascript" src="js/GraphicalObject/Tower.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/BridgeTensor.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Bridge.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Water.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Basin.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Ground.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Sky.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Tree.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/TreeCrown.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/TreeTrunk.js"></script>
@@ -67,14 +71,65 @@
 			uniform mat4 uPMatrix;
 			uniform mat3 uNMatrix;
 
+            uniform bool uUseReflection;
+            uniform bool uDrawSkyBox;
+
+            uniform bool uUseWaveEffect;
+			uniform float uWavesAmplitudes[4];
+			uniform vec2 uWavesDirections[4];
+			uniform float uWavesFrequencies[4];
+			uniform float uWavesPhases[4];
+			uniform vec2 uTextureWavesDisplacements[4];
+			uniform float uWaveTime;
+
 			varying vec3 normalInterp;
 			varying vec3 tangentInterp;
 			varying vec3 binormalInterp;
 
 			varying vec3 vertPos;
 			varying vec2 vTextureCoord;
+			varying vec2 vWaveTextureCoords[4];
 
+            varying vec3 reflectDir;
+            float dWaveDz(float z, float x, int i) {
+				float phaseTerm = uWaveTime * uWavesPhases[i];
+				float a = uWavesFrequencies[i] * uWavesDirections[i].x * uWavesAmplitudes[i];
+				return a * cos(dot(uWavesDirections[i], vec2(z, x)) * uWavesFrequencies[i] + phaseTerm);
+			}
 
+			float dWaveDx(float z, float x, int i) {
+				float phaseTerm = uWaveTime * uWavesPhases[i];
+				float a = uWavesFrequencies[i] * uWavesDirections[i].y * uWavesAmplitudes[i];
+				return a * cos(dot(uWavesDirections[i], vec2(z, x)) * uWavesFrequencies[i] + phaseTerm);
+			}
+
+			vec3 waveNormal(float z, float x) {
+				float dx = 0.0;
+				float dy = 1.0;
+				float dz = 0.0;
+				for (int i = 0; i != 4; i++) {
+					dx += dWaveDx(z, x, i);
+					dz += dWaveDz(z, x, i);
+				}
+				return normalize(vec3(-dx, 1.0, -dz));
+			}
+
+			float wave(float z, float x, int i) {
+				float phaseTerm = uWaveTime * uWavesPhases[i];
+				return uWavesAmplitudes[i] * sin(dot(uWavesDirections[i], vec2(z, x)) * uWavesFrequencies[i] + phaseTerm);
+			}
+
+			float waveHeight(float z, float x) {
+				float height = 0.0;
+				for (int i = 0; i != 4; i++) {
+					height += wave(z, x, i);
+				}
+				return height;
+			}
+
+			vec2 waveTextureCoord(int i) {
+				return aTextureCoord + uTextureWavesDisplacements[i] * uWaveTime;
+			}
 			void main(){
 				float x = aVertexPosition.x;
 				float y = aVertexPosition.y;
@@ -86,6 +141,15 @@
 
 				vTextureCoord = aTextureCoord;
 
+                if (uUseWaveEffect) {
+					y = waveHeight(z, x);
+
+					normal = waveNormal(z, x);
+
+					for (int i = 0; i != 4; i++) {
+						vWaveTextureCoords[i] = waveTextureCoord(i);
+					}
+				}
 
     			gl_Position = uPMatrix * uMVMatrix * vec4(x, y, z, 1.0);
     			vec4 vertPos4 = uMVMatrix * vec4(x, y, z, 1.0);
@@ -95,6 +159,15 @@
     			tangentInterp = normalize(uNMatrix * tangent);
     			binormalInterp = normalize(uNMatrix * binormal);
 
+                if (uUseReflection) {
+                    if (uDrawSkyBox) {
+    					reflectDir = vec3(x, y, z);
+    				} else {
+    					vec3 view = normalize(vertPos);
+    					reflectDir = reflect(view, normalInterp);
+    					reflectDir = vec3(uInverseVMatrix * vec4(reflectDir, 0.0));
+    				}
+    			}
 			}
 
     </script>
@@ -104,7 +177,16 @@
 			precision mediump float;
 			uniform sampler2D uSampler;
 			uniform sampler2D uNormalSampler;
+			uniform samplerCube uCubeSampler;
 
+            uniform bool uUseWaveEffect;
+
+            uniform bool uUseBlending;
+			uniform float uAlpha;
+
+            uniform bool uUseReflection;
+            uniform bool uDrawSkyBox;
+            uniform float uReflectFactor;
 
 			varying vec3 normalInterp;
 			varying vec3 tangentInterp;
@@ -112,6 +194,7 @@
 
 			varying vec3 vertPos;
 			varying vec2 vTextureCoord;
+			varying vec3 reflectDir;
 
 			struct Light{
     			vec3 Position; // Light position in eye coords.
@@ -133,18 +216,43 @@
 			void main() {
     			vec3 normal = normalize(normalInterp);
 
-    			vec3 lightDir = normalize(uLight.Position - vertPos);
+                if (uUseNormalMap){
+    				vec3 tangent = normalize(tangentInterp);
+    				vec3 binormal = normalize(binormalInterp);
 
+    				mat3 tbn = mat3(tangent, binormal, normal);
+    				vec3 normalCoordinate = texture2D(uNormalSampler, vec2(vTextureCoord.s, vTextureCoord.t)).xyz * 2.0 - 1.0;
+
+    				//Transform the normal vector in the RGB channels to tangent space
+    				normal = normalize(tbn * normalCoordinate);
+    			}
+
+    			vec3 lightDir = normalize(uLight.Position - vertPos);
+                vec3 lightReflectDir = reflect(-lightDir, normal);
     			vec3 viewDir = normalize(-vertPos);
 
     			float lambertian = max(dot(lightDir,normal), 0.0);
     			float specular = 0.0;
-
+                if(lambertian > 0.0) {
+       				float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
+       				specular = pow(specAngle, uMaterial.Shininess);
+    			}
     			vec3 vLight = uLight.La * uMaterial.Ka + lambertian * uLight.Ld * uMaterial.Kd + specular * uLight.Ls * uMaterial.Ks;
 
     			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-				gl_FragColor = vec4(textureColor.rgb * vLight, textureColor.a);
-
+    			if (uUseBlending) {
+    				textureColor.a *= uAlpha;
+    			}
+				if (uUseReflection) {
+    				vec4 cubemapColor = textureCube(uCubeSampler, reflectDir);
+					if (uDrawSkyBox) {
+    					gl_FragColor = cubemapColor;
+    				} else {
+						gl_FragColor = vec4(mix(textureColor, cubemapColor, uReflectFactor).rgb * vLight, textureColor.a);
+    				}
+    			} else {
+					gl_FragColor = vec4(textureColor.rgb * vLight, textureColor.a);
+    			}
 			}
 
     </script>
@@ -171,6 +279,7 @@
                 graphicalUSerInterfaceControl = new GraphicalUserInterfaceControl();
                 graphicalUSerInterfaceControl.start();
                 riverMap = new RiverMap();
+                scene = new Scene();
                 riverMap.tick();
                 refreshScene();
             } catch (e) {
@@ -178,7 +287,8 @@
             }
         }
         function refreshScene() {
-            scene = new Scene(riverMap);
+            riverMap.setOrigin();
+            scene.createSkyGroundAndCamera();
             keyboardController = new KeyboardController(scene);
             scene.tick();
         }

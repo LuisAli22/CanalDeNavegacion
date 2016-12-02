@@ -23,6 +23,32 @@ var GraphicalObject;
         this.webgl_binormal_buffer = null;
         this.webgl_color_buffer = null;
     };
+    GraphicalObject.prototype.incrementIndex = function (index) {
+        return (index % 2 === 0);
+    };
+    GraphicalObject.prototype.loadIndexBufferData = function (nz, nx) {
+        var trajectoryIndex;
+        var levelIndex;
+        var levelLength = nz;
+        var trajectoryLength = nx;
+        var lowerStartIndex = 0;
+        var upperStartIndex;
+        for (trajectoryIndex = 0; trajectoryIndex < trajectoryLength - 1; trajectoryIndex += 1) {
+            upperStartIndex = lowerStartIndex + levelLength;
+            for (levelIndex = 0; levelIndex < levelLength; levelIndex += 1) {
+                this.bufferList.index.push(lowerStartIndex);
+                this.bufferList.index.push(upperStartIndex);
+                if (this.incrementIndex(trajectoryIndex)) {
+                    lowerStartIndex += 1;
+                    upperStartIndex += 1;
+                } else {
+                    lowerStartIndex -= 1;
+                    upperStartIndex -= 1;
+                }
+            }
+            lowerStartIndex = this.bufferList.index[this.bufferList.index.length - 1];
+        }
+    };
     GraphicalObject.prototype.bindBuffers = function () {
         this.webgl_normal_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
@@ -91,6 +117,6 @@ var GraphicalObject;
         this.defineGenericVertexAtributeArray();
         this.graphicContainer.setMatrixUniforms(modelViewMatrix);
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.webgl_index_buffer);
-        this.gl.drawElements(this.gl.TRIANGLES, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.drawElements(this.gl.TRIANGLE_STRIP, this.webgl_index_buffer.numItems, this.gl.UNSIGNED_SHORT, 0);
     };
 }());

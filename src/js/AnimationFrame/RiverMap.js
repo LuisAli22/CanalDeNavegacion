@@ -1,5 +1,5 @@
 /*global RiverMapGraphicContainer, AnimationFrame, vec4, vec2, Bspline, TwoDimensionShapeContainer, FARFROMANYPOINT*/
-/*global CLICKDISTANCESENSITIVENESS, YCOORDINATE, XCOORDINATE, ZCOORDINATE, ControlPoints*/
+/*global CLICKDISTANCESENSITIVENESS, YCOORDINATE, XCOORDINATE, ZCOORDINATE, ControlPoints, controlValues*/
 var RiverMap;
 (function () {
     "use strict";
@@ -11,7 +11,7 @@ var RiverMap;
         this.setControlPoints();
         this.bspline = new Bspline(this.controlPoints, 100, [0, 1, 0]);
         this.trajectory = [];
-        this.equatorDistance = this.graphicContainer.canvas.height / 2;
+        this.equatorDistance = this.graphicContainer.canvas.height * (controlValues.bridgePosition / 100);
         this.origin = vec2.create();
     };
     RiverMap.prototype = Object.create(AnimationFrame.prototype);
@@ -19,7 +19,7 @@ var RiverMap;
     RiverMap.prototype.getCurveCenter = function () {
         return this.origin;
     };
-    RiverMap.prototype.resetSecondPointAndPreviousLastPointPositionsToMakeExtemesTangenPerpenduclarToXAxis = function () {
+    RiverMap.prototype.resetSecondPointAndPreviousLastPointPositionsToMakeExtremesTangentPerpendicularToXAxis = function () {
         var previousIndex = this.controlPoints.length - 2;
         var lastIndex = this.controlPoints.length - 1;
         this.controlPoints[1][0] = this.controlPoints[0][0];
@@ -36,7 +36,7 @@ var RiverMap;
             point = [x, 0, z];
             this.controlPoints.push(point);
         }
-        this.resetSecondPointAndPreviousLastPointPositionsToMakeExtemesTangenPerpenduclarToXAxis();
+        this.resetSecondPointAndPreviousLastPointPositionsToMakeExtremesTangentPerpendicularToXAxis();
     };
     RiverMap.prototype.clikedPointIsNotOneOfTheExtreme = function (index, controlPointsLength) {
         return ((index > 1) && (index < controlPointsLength - 2));
@@ -83,6 +83,12 @@ var RiverMap;
             vec2.set(this.origin, xCoordinate, yCoordinate);
         }
     };
+    RiverMap.prototype.setOrigin = function () {
+        this.equatorDistance = this.graphicContainer.canvas.height * (controlValues.bridgePosition / 100);
+        this.trajectory.forEach(function (currentCurvePoint) {
+            this.checkAndSetOrigin(currentCurvePoint.position[XCOORDINATE], currentCurvePoint.position[ZCOORDINATE]);
+        }, this);
+    };
     RiverMap.prototype.drawFullCurve = function () {
         this.trajectory = this.bspline.getCurvePoints();
         this.graphicContainer.setLineWidth(5);
@@ -94,7 +100,6 @@ var RiverMap;
             } else {
                 this.graphicContainer.lineTo(currentCurvePoint.position[XCOORDINATE], currentCurvePoint.position[ZCOORDINATE]);
             }
-            this.checkAndSetOrigin(currentCurvePoint.position[XCOORDINATE], currentCurvePoint.position[ZCOORDINATE]);
         }, this);
         this.graphicContainer.setStrokeStyle("#0000FF");
         this.graphicContainer.stroke();

@@ -2,9 +2,8 @@
 var Grass;
 (function () {
     "use strict";
-    Grass = function (graphicContainer, sandPositions, levelControlPointsAmount, grassLimit, sandDistance, streetWidth) {
+    Grass = function (graphicContainer, sandPositions, levelControlPointsAmount, grassLimit, streetWidth) {
         GraphicalObject.call(this, graphicContainer);
-        this.sandDistance = sandDistance;
         this.sandPositions = sandPositions.slice(0);
         this.levelControlPointsAmount = levelControlPointsAmount;
         this.grassLimit = grassLimit;
@@ -18,9 +17,8 @@ var Grass;
         this.grassTangentNormalBinormalAndPositions = [];
         this.treesPositions = [];
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.grassTexture = this.textureHandler.initializeTexture("img/grass.jpg");
+        this.grassTexture = this.textureHandler.initializeTexture("img/pasto3.jpg");
         this.setUpBuffers();
-//        this.setUpStreetLimits();
         this.trees = this.initTrees();
     };
     Grass.prototype = Object.create(GraphicalObject.prototype);
@@ -59,27 +57,11 @@ var Grass;
             this.bufferList.tangent.push(element.tangent[XCOORDINATE], element.tangent[YCOORDINATE], element.tangent[ZCOORDINATE]);
             this.bufferList.normal.push(element.normal[XCOORDINATE], element.normal[YCOORDINATE], element.normal[ZCOORDINATE]);
             this.bufferList.binormal.push(element.binormal[XCOORDINATE], element.binormal[YCOORDINATE], element.binormal[ZCOORDINATE]);
-            this.bufferList.texture_coord.push(u, v);
+            this.bufferList.texture_coord.push(v, u);
             this.bufferList.color.push(0x66, 0xff, 0x66);
         }, this);
-        this.loadIndexBufferData();
+        this.loadIndexBufferData(this.grassVertexAmountInABank, this.bufferList.position.length / (3 * this.grassVertexAmountInABank));
         this.bindBuffers();
-    };
-    Grass.prototype.loadIndexBufferData = function () {
-        var trajectoryIndex;
-        var levelIndex;
-        var levelLength = this.grassVertexAmountInABank;
-        var trajectoryLength = this.bufferList.position.length / (3 * this.grassVertexAmountInABank);
-        for (trajectoryIndex = 0; trajectoryIndex < trajectoryLength - 1; trajectoryIndex += 1) {
-            for (levelIndex = 0; levelIndex < levelLength - 1; levelIndex += 1) {
-                this.bufferList.index.push(trajectoryIndex * levelLength + levelIndex);
-                this.bufferList.index.push((trajectoryIndex + 1) * levelLength + (levelIndex + 1));
-                this.bufferList.index.push(trajectoryIndex * levelLength + (levelIndex + 1));
-                this.bufferList.index.push(trajectoryIndex * levelLength + levelIndex);
-                this.bufferList.index.push((trajectoryIndex + 1) * levelLength + levelIndex);
-                this.bufferList.index.push((trajectoryIndex + 1) * levelLength + (levelIndex + 1));
-            }
-        }
     };
     Grass.prototype.initTrees = function () {
         var trees = [];

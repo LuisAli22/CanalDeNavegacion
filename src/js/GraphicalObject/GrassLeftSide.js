@@ -2,8 +2,8 @@
 var GrassLeftSide;
 (function () {
     "use strict";
-    GrassLeftSide = function (graphicContainer, sandPositions, levelControlPointsAmount, sandDistance, streetWidth) {
-        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 360, sandDistance, streetWidth);
+    GrassLeftSide = function (graphicContainer, sandPositions, levelControlPointsAmount, streetWidth) {
+        Grass.call(this, graphicContainer, sandPositions, levelControlPointsAmount, 360, streetWidth);
     };
     GrassLeftSide.prototype = Object.create(Grass.prototype);
     GrassLeftSide.prototype.constructor = Grass;
@@ -16,7 +16,7 @@ var GrassLeftSide;
             var lowerXLimit = Math.ceil(xCoordinate);
             var xRandomValue = Math.floor((Math.random() * (this.grassLimit - lowerXLimit)) + lowerXLimit);
             if ((z > (this.streetZPositionValue + this.streetWidth / 2)) || (z < this.streetZPositionValue - this.streetWidth / 2)) {
-                this.treesPositions.push([xRandomValue, y + this.sandDistance, z]);
+                this.treesPositions.push([xRandomValue, y, z]);
             }
         }
     };
@@ -31,12 +31,12 @@ var GrassLeftSide;
             this.createRandomTree(xCoordinate, y, z);
             for (currentIndex = 0; currentIndex < this.grassVertexAmountInABank - 2; currentIndex += 1) {
                 xCoordinate += stepDistanceBetweenVertex;
-                this.grassPositions.push(vec3.fromValues(xCoordinate, y + this.sandDistance, z));
+                this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
                 if (currentIndex === 0) {
                     this.setRiverStreetIntersection(z, xCoordinate, 1);
                 }
             }
-            this.grassPositions.push(vec3.fromValues(this.grassLimit, y + this.sandDistance, z));
+            this.grassPositions.push(vec3.fromValues(this.grassLimit, y, z));
         }
     };
 }());

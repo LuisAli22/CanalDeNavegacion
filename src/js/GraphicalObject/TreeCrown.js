@@ -3,9 +3,13 @@ var TreeCrown;
 (function () {
     "use strict";
     TreeCrown = function (graphicContainer, slices, pointsPerSegment) {
-        var n = Math.floor((Math.random() * 3) + 1);
+        this.graphicContainer = graphicContainer;
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.crownTexture = this.textureHandler.initializeTexture("img/crown_" + n + ".jpg");
+        this.crownTexture = this.textureHandler.initializeTexture("img/hojas.jpg");
+        this.materialKa = [0.3, 0.3, 0.3];
+        this.materialKd = [0.9, 0.9, 0.9];
+        this.materialKs = [0.0, 0.0, 0.0];
+        this.materialShininess = 4.0;
         this.uTextureScale = 1 / 4;
         this.vTextureScale = 1 / 8;
         this.pointsPerSegment = pointsPerSegment;
@@ -52,6 +56,7 @@ var TreeCrown;
 
     TreeCrown.prototype.draw = function (modelViewMatrix) {
         this.textureHandler.setTextureUniform(this.crownTexture);
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess);
         this.crown.draw(modelViewMatrix);
     };
 }());

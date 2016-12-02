@@ -2,18 +2,17 @@
 var TowerBody;
 (function () {
     "use strict";
-    TowerBody = function (graphicContainer, height) {
+    TowerBody = function (graphicContainer, height, scaleLevelPoint) {
         this.height = height;
         this.towerBodyLevelGeometry = [];
         this.createLevelPoints();
         this.towerBodyTrajectory = [];
         this.createTrajectory();
-        this.sweptSurface = new SweptSurface(graphicContainer, this.towerBodyLevelGeometry, this.towerBodyTrajectory, [0xff, 0x00, 0x00]);
+        this.sweptSurface = new SweptSurface(graphicContainer, this.towerBodyLevelGeometry, this.towerBodyTrajectory, null, scaleLevelPoint);
     };
     TowerBody.prototype.createLevelPoints = function () {
         var calculator = Calculator.getInstance();
-        var levelPointsPosition = calculator.towerMainLevelGeometry(true);
-        calculator.storePositionsTangentNormalAndBinormal(levelPointsPosition, this.towerBodyLevelGeometry);
+        this.towerBodyLevelGeometry = calculator.towerMainLevelGeometry(true);
     };
     TowerBody.prototype.createTrajectory = function () {
         var controlPoints = [];

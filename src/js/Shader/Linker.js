@@ -30,6 +30,8 @@ var Linker;
         this.shaderProgram.mvMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, "uMVMatrix");
         this.shaderProgram.nMatrixUniform = this.gl.getUniformLocation(this.shaderProgram, "uNMatrix");
         this.shaderProgram.samplerUniform = this.gl.getUniformLocation(this.shaderProgram, "uSampler");
+        this.shaderProgram.cubeSamplerUniform = this.gl.getUniformLocation(this.shaderProgram, "uCubeSampler");
+        this.shaderProgram.samplerNormal = this.gl.getUniformLocation(this.shaderProgram, "uNormalSampler");
 
         this.shaderProgram.lightingPositionUniform = this.gl.getUniformLocation(this.shaderProgram, "uLight.Position");
         this.shaderProgram.lightLa = this.gl.getUniformLocation(this.shaderProgram, "uLight.La");
@@ -40,7 +42,24 @@ var Linker;
         this.shaderProgram.materialKd = this.gl.getUniformLocation(this.shaderProgram, "uMaterial.Kd");
         this.shaderProgram.materialKs = this.gl.getUniformLocation(this.shaderProgram, "uMaterial.Ks");
 
+        this.shaderProgram.materialShininess = this.gl.getUniformLocation(this.shaderProgram, "uMaterial.Shininess");
+
+        this.shaderProgram.useWaveEffectUniform = this.gl.getUniformLocation(this.shaderProgram, "uUseWaveEffect");
+        this.shaderProgram.wavesAmplitudesUniform = this.gl.getUniformLocation(this.shaderProgram, "uWavesAmplitudes");
+        this.shaderProgram.wavesDirectionsUniform = this.gl.getUniformLocation(this.shaderProgram, "uWavesDirections");
+        this.shaderProgram.wavesFrequenciesUniform = this.gl.getUniformLocation(this.shaderProgram, "uWavesFrequencies");
+        this.shaderProgram.wavesPhasesUniform = this.gl.getUniformLocation(this.shaderProgram, "uWavesPhases");
+        this.shaderProgram.textureWavesDisplacementsUniform = this.gl.getUniformLocation(this.shaderProgram, "uTextureWavesDisplacements");
+        this.shaderProgram.waveTimeUniform = this.gl.getUniformLocation(this.shaderProgram, "uWaveTime");
+
         this.shaderProgram.useNormalMap = this.gl.getUniformLocation(this.shaderProgram, "uUseNormalMap");
+
+        this.shaderProgram.useBlendingUniform = this.gl.getUniformLocation(this.shaderProgram, "uUseBlending");
+        this.shaderProgram.alphaUniform = this.gl.getUniformLocation(this.shaderProgram, "uAlpha");
+
+        this.shaderProgram.useReflectionUniform = this.gl.getUniformLocation(this.shaderProgram, "uUseReflection");
+        this.shaderProgram.drawSkyBoxUniform = this.gl.getUniformLocation(this.shaderProgram, "uDrawSkyBox");
+        this.shaderProgram.reflectFactorUniform = this.gl.getUniformLocation(this.shaderProgram, "uReflectFactor");
     };
     Linker.prototype.start = function () {
         this.gl.attachShader(this.shaderProgram, this.vertexShader);

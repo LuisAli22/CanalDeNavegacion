@@ -17,124 +17,123 @@ var RevolutionSurface;
     };
     RevolutionSurface.prototype = Object.create(GraphicalObject.prototype);
     RevolutionSurface.prototype.constructor = RevolutionSurface;
+    RevolutionSurface.prototype.singleProfileSurface = function () {
+        return (this.profiles.length === 1);
+    };
+    RevolutionSurface.prototype.rotatePointPositionNormalBinormalAndTangentAndStoreInBufferList = function (currentProfilePoint, angle, i, j, rotatedProfilePoints) {
+        var rotationMatrix = mat4.create();
+        mat4.rotate(rotationMatrix, rotationMatrix, angle, this.rotationAxis);
+        var levelPoint = currentProfilePoint.position;
+        levelPoint = vec3.transformMat4(vec3.create(), levelPoint, rotationMatrix);
+        if (rotatedProfilePoints) {
+            rotatedProfilePoints.push(levelPoint);
+        } else {
+            var pbn = currentProfilePoint.binormal;
+            var pn = currentProfilePoint.normal;
+            var pt = currentProfilePoint.tangent;
+            pbn = vec3.transformMat4(vec3.create(), pbn, rotationMatrix);
+            pn = vec3.transformMat4(vec3.create(), pn, rotationMatrix);
+            pt = vec3.transformMat4(vec3.create(), pt, rotationMatrix);
+
+            this.bufferList.position.push(levelPoint[0], levelPoint[1], levelPoint[2]);
+            this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
+            this.bufferList.normal.push(pbn[0], pbn[1], pbn[2]);
+            this.bufferList.binormal.push(pn[0], pn[1], pn[2]);
+            this.bufferList.tangent.push(pt[0], pt[1], pt[2]);
+            this.bufferList.texture_coord.push(this.uTextureScale * i, this.vTextureScale * j);
+        }
+    };
+    RevolutionSurface.prototype.rotateAndStoreProfilePoints = function (profilePoints, i, angle, rotatedProfilePoints) {
+        var j;
+        for (j = 0; j < this.profilePointsNumber; j += 1) {
+            this.rotatePointPositionNormalBinormalAndTangentAndStoreInBufferList(profilePoints[j], angle, i, j, rotatedProfilePoints);
+        }
+    };
+    RevolutionSurface.prototype.rotateSingleProfileAndStoreDataToBufferList = function (angle, angleDif) {
+        var i;
+        var profilePoints = this.profiles[0];
+        var deltaAngle = angleDif / this.slicesPerSection;
+        for (i = 0; i <= this.slicesPerSection; i += 1) {
+            this.rotateAndStoreProfilePoints(profilePoints, i, angle, null);
+            angle += deltaAngle;
+        }
+    };
+    RevolutionSurface.prototype.rotateAllProfiles = function (angle, angleDif) {
+        var rotatedProfiles = [];
+        var rotatedProfilePoints;
+        var profilePoints;
+        var i;
+        var deltaAngle = angleDif / this.profiles.length;
+        for (i = 0; i < this.profiles.length; i += 1) {
+            profilePoints = this.profiles[i];
+            rotatedProfilePoints = [];
+            this.rotateAndStoreProfilePoints(profilePoints, i, angle, rotatedProfilePoints);
+            rotatedProfiles.push(rotatedProfilePoints);
+            angle += deltaAngle;
+        }
+        return rotatedProfiles.slice(0);
+    };
+    RevolutionSurface.prototype.storeBsplineCurvePointsToBufferListPositionColorAndTexture = function (profileIndex, levelCurve) {
+        var curvePointIndex;
+        var curveLength = levelCurve.length;
+        var position;
+        for (curvePointIndex = 0; curvePointIndex < curveLength; curvePointIndex += 1) {
+            position = levelCurve[curvePointIndex].position;
+            this.bufferList.position.push(position[0], position[1], position[2]);
+            this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
+            this.bufferList.texture_coord.push(this.uTextureScale * curvePointIndex, this.vTextureScale * profileIndex);
+            if (curvePointIndex < curveLength - 1) {
+                this.storeNormalBinormalAndTangentToBufferList(profileIndex, curvePointIndex, curveLength);
+            }
+        }
+        var pos = this.bufferList.normal.length - (curveLength - 1) * 3;
+        this.bufferList.normal.push(this.bufferList.normal[pos], this.bufferList.normal[pos + 1], this.bufferList.normal[pos + 2]);
+        this.bufferList.binormal.push(this.bufferList.binormal[pos], this.bufferList.binormal[pos + 1], this.bufferList.binormal[pos + 2]);
+        this.bufferList.tangent.push(this.bufferList.tangent[pos], this.bufferList.tangent[pos + 1], this.bufferList.tangent[pos + 2]);
+    };
+    RevolutionSurface.prototype.storeNormalBinormalAndTangentToBufferList = function (profileIndex, curvePointIndex, curveLength) {
+        var calculator = Calculator.getInstance();
+        var v = calculator.calculateNormalFromNeighbors(curvePointIndex, profileIndex, this.bufferList.position, curveLength, this.profilePointsNumber, true);
+        var binormal = v[0];
+        var normal = v[1];
+        var tangent = v[2];
+        this.bufferList.normal.push(normal[0], normal[1], normal[2]);
+        this.bufferList.binormal.push(binormal[0], binormal[1], binormal[2]);
+        this.bufferList.tangent.push(tangent[0], tangent[1], tangent[2]);
+    };
+    RevolutionSurface.prototype.createControlPoints = function (profilePointIndex, rotatedProfiles) {
+        var profileIndex;
+        var controlPoints = [];
+        for (profileIndex = 0; profileIndex < this.profiles.length; profileIndex += 1) {
+            controlPoints.push(rotatedProfiles[profileIndex][profilePointIndex]);
+        }
+        controlPoints.push(controlPoints[0], controlPoints[1]);
+        return controlPoints.slice(0);
+    };
+    RevolutionSurface.prototype.forEachProfileGetBsplineCurveAndStoreDataToBufferList = function (rotatedProfiles) {
+        var profilePointIndex;
+        var controlPoints;
+        var levelCurve;
+        var bSpline;
+        for (profilePointIndex = 0; profilePointIndex < this.profilePointsNumber; profilePointIndex += 1) {
+            controlPoints = this.createControlPoints(profilePointIndex, rotatedProfiles);
+            bSpline = new Bspline(controlPoints, this.slicesPerSection + 1, null);
+            levelCurve = bSpline.getCurvePoints();
+            this.storeBsplineCurvePointsToBufferListPositionColorAndTexture(profilePointIndex, levelCurve);
+        }
+        this.loadIndexBufferData(levelCurve.length, this.profilePointsNumber);
+    };
     RevolutionSurface.prototype.initBuffers = function () {
         var angleDif = this.endAngle - this.startAngle;
         var angle = this.startAngle;
-        var i;
-        var rotationMatrix;
-        var j;
-        var levelPoint;
-        var pbn;
-        var pn;
-        var pt;
-        var deltaAngle;
-        var profilePoints;
-        if (this.profiles.length === 1) {
-            profilePoints = this.profiles[0];
-            deltaAngle = angleDif / this.slicesPerSection;
-            for (i = 0; i <= this.slicesPerSection; i += 1) {
-                rotationMatrix = mat4.create();
-                mat4.rotate(rotationMatrix, rotationMatrix, angle, this.rotationAxis);
-
-                for (j = 0; j < this.profilePointsNumber; j += 1) {
-                    levelPoint = profilePoints[j].position;
-                    levelPoint = vec3.transformMat4(vec3.create(), levelPoint, rotationMatrix);
-                    pbn = profilePoints[j].binormal;
-                    pn = profilePoints[j].normal;
-                    pt = profilePoints[j].tangent;
-                    pbn = vec3.transformMat4(vec3.create(), pbn, rotationMatrix);
-                    pn = vec3.transformMat4(vec3.create(), pn, rotationMatrix);
-                    pt = vec3.transformMat4(vec3.create(), pt, rotationMatrix);
-
-                    this.bufferList.position.push(levelPoint[0], levelPoint[1], levelPoint[2]);
-                    this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
-                    this.bufferList.normal.push(pbn[0], pbn[1], pbn[2]);
-                    this.bufferList.binormal.push(pn[0], pn[1], pn[2]);
-                    this.bufferList.tangent.push(pt[0], pt[1], pt[2]);
-                    this.bufferList.texture_coord.push(this.uTextureScale * i, this.vTextureScale * j);
-                }
-                angle += deltaAngle;
-            }
-
-            this.loadIndexData(this.profilePointsNumber, this.slicesPerSection + 1, this.bufferList.index);
+        if (this.singleProfileSurface()) {
+            this.rotateSingleProfileAndStoreDataToBufferList(angle, angleDif);
+            this.loadIndexBufferData(this.profilePointsNumber, this.slicesPerSection + 1);
 
         } else {
-            var rotatedProfiles = [];
-            var rotatedProfilePoints;
-            deltaAngle = angleDif / this.profiles.length;
-            for (i = 0; i < this.profiles.length; i += 1) {
-                profilePoints = this.profiles[i];
-                rotationMatrix = mat4.create();
-                mat4.rotate(rotationMatrix, rotationMatrix, angle, this.rotationAxis);
-                rotatedProfilePoints = [];
-                for (j = 0; j < this.profilePointsNumber; j += 1) {
-                    levelPoint = profilePoints[j].position;
-                    levelPoint = vec3.transformMat4(vec3.create(), levelPoint, rotationMatrix);
-                    rotatedProfilePoints.push(levelPoint);
-                }
-                rotatedProfiles.push(rotatedProfilePoints);
-                angle += deltaAngle;
-            }
-
-            var l = 0;
-            var controlPoints;
-            var levelCurve;
-            var k;
-            var position;
-            var v;
-            var binormal;
-            var normal;
-            var tangent;
-            var pos;
-            var bSpline;
-            var calculator = Calculator.getInstance();
-            for (i = 0; i < this.profilePointsNumber; i += 1) {
-                controlPoints = [];
-                for (j = 0; j < this.profiles.length; j += 1) {
-                    controlPoints.push(rotatedProfiles[j][i]);
-                }
-                controlPoints.push(controlPoints[0], controlPoints[1]);
-                bSpline = new Bspline(controlPoints, this.slicesPerSection + 1, null);
-                levelCurve = bSpline.getCurvePoints();
-                l = levelCurve.length;
-                for (k = 0; k < l; k += 1) {
-                    position = levelCurve[k].position;
-                    this.bufferList.position.push(position[0], position[1], position[2]);
-                    this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
-                    this.bufferList.texture_coord.push(this.uTextureScale * k, this.vTextureScale * i);
-                }
-            }
-            for (i = 0; i < this.profilePointsNumber; i += 1) {
-                for (j = 0; j < l - 1; j += 1) {
-                    v = calculator.calculateNormalFromNeighbors(j, i, this.bufferList.position, l, this.profilePointsNumber, true);
-                    binormal = v[0];
-                    normal = v[1];
-                    tangent = v[2];
-                    this.bufferList.normal.push(normal[0], normal[1], normal[2]);
-                    this.bufferList.binormal.push(binormal[0], binormal[1], binormal[2]);
-                    this.bufferList.tangent.push(tangent[0], tangent[1], tangent[2]);
-                }
-                pos = this.bufferList.normal.length - (l - 1) * 3;
-                this.bufferList.normal.push(this.bufferList.normal[pos], this.bufferList.normal[pos + 1], this.bufferList.normal[pos + 2]);
-                this.bufferList.binormal.push(this.bufferList.binormal[pos], this.bufferList.binormal[pos + 1], this.bufferList.binormal[pos + 2]);
-                this.bufferList.tangent.push(this.bufferList.tangent[pos], this.bufferList.tangent[pos + 1], this.bufferList.tangent[pos + 2]);
-            }
-            this.loadIndexData(l, this.profilePointsNumber, this.bufferList.index);
+            var rotatedProfiles = this.rotateAllProfiles(angle, angleDif);
+            this.forEachProfileGetBsplineCurveAndStoreDataToBufferList(rotatedProfiles);
         }
-        this.bindBuffers(this.bufferList.position, this.bufferList.normal, this.bufferList.texture_coord, this.bufferList.index, this.bufferList.tangent, this.bufferList.binormal);
-    };
-    RevolutionSurface.prototype.loadIndexData = function (nz, nx) {
-        var i;
-        var j;
-        for (i = 0; i < nx - 1; i += 1) {
-            for (j = 0; j < nz - 1; j += 1) {
-                this.bufferList.index.push(i * nz + j);
-                this.bufferList.index.push((i + 1) * nz + (j + 1));
-                this.bufferList.index.push(i * nz + (j + 1));
-                this.bufferList.index.push(i * nz + j);
-                this.bufferList.index.push((i + 1) * nz + j);
-                this.bufferList.index.push((i + 1) * nz + (j + 1));
-            }
-        }
+        this.bindBuffers();
     };
 }());
