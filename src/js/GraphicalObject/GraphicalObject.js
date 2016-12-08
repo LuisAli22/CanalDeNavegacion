@@ -13,7 +13,6 @@ var GraphicalObject;
             "index": [],
             "tangent": [],
             "binormal": [],
-            "color": []
         };
         this.webgl_position_buffer = null;
         this.webgl_normal_buffer = null;
@@ -21,7 +20,6 @@ var GraphicalObject;
         this.webgl_index_buffer = null;
         this.webgl_tangent_buffer = null;
         this.webgl_binormal_buffer = null;
-        this.webgl_color_buffer = null;
     };
     GraphicalObject.prototype.incrementIndex = function (index) {
         return (index % 2 === 0);
@@ -29,13 +27,11 @@ var GraphicalObject;
     GraphicalObject.prototype.loadIndexBufferData = function (nz, nx) {
         var trajectoryIndex;
         var levelIndex;
-        var levelLength = nz;
-        var trajectoryLength = nx;
         var lowerStartIndex = 0;
         var upperStartIndex;
-        for (trajectoryIndex = 0; trajectoryIndex < trajectoryLength - 1; trajectoryIndex += 1) {
-            upperStartIndex = lowerStartIndex + levelLength;
-            for (levelIndex = 0; levelIndex < levelLength; levelIndex += 1) {
+        for (trajectoryIndex = 0; trajectoryIndex < nx - 1; trajectoryIndex += 1) {
+            upperStartIndex = lowerStartIndex + nz;
+            for (levelIndex = 0; levelIndex < nz; levelIndex += 1) {
                 this.bufferList.index.push(lowerStartIndex);
                 this.bufferList.index.push(upperStartIndex);
                 if (this.incrementIndex(trajectoryIndex)) {
@@ -84,11 +80,6 @@ var GraphicalObject;
             this.webgl_binormal_buffer.itemSize = 3;
             this.webgl_binormal_buffer.numItems = this.bufferList.binormal.length / 3;
         }
-        this.webgl_color_buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_color_buffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.bufferList.color), this.gl.STATIC_DRAW);
-        this.webgl_color_buffer.itemSize = 3;
-        this.webgl_color_buffer.numItems = this.bufferList.color.length / 3;
     };
     GraphicalObject.prototype.defineGenericVertexAtributeArray = function () {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_position_buffer);
@@ -97,7 +88,6 @@ var GraphicalObject;
         this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.webgl_texture_coord_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_color_buffer);
         if (this.webgl_tangent_buffer !== null) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);

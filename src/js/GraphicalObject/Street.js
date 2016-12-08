@@ -15,7 +15,7 @@ var Street;
         this.createStreetTrajectory();
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
         this.streetTexture = this.textureHandler.initializeTexture("img/tramo-doblemarilla.jpg");
-        this.sweptSurface = new SweptSurface(graphicContainer, this.streetLevelGeometry, this.streetTrajectory, null, false);
+        this.sweptSurface = new SweptSurface(graphicContainer, this.streetLevelGeometry, this.streetTrajectory, false);
     };
     Street.prototype.getZPositionValue = function () {
         return this.streetZPositionValue;
@@ -59,7 +59,7 @@ var Street;
         this.streetRiverRightSide();
     };
     Street.prototype.loadCurvePointsToTrajectory = function (controlPoints) {
-        var bSpline = new Bspline(controlPoints, 5, [0, 1, 0]);
+        var bSpline = new Bspline(controlPoints, 5, [0, 1, 0], false);
         var curvePoints = bSpline.getCurvePoints();
         curvePoints.forEach(function (element) {
             this.streetTrajectory.push(element);

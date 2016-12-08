@@ -1,6 +1,6 @@
 /*jslint browser: true*/
 /*global SceneGraphicContainer, Cylinder,Orbital, Camera, mat4,AnimationFrame*/
-/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, TextureHandler, Ground, TreeTrunk, riverMap, vec2, PedestrianCamera*/
+/*global FRUSTUMNEAR, FRUSTUMFAR, ModelViewMatrixStack, vec3, TextureHandler, Ground, TreeTrunk, riverMap, vec2, PedestrianCamera, Water*/
 /*global SCENESCALEFACTOR, Sky*/
 var Scene;
 (function () {
@@ -12,8 +12,6 @@ var Scene;
         this.projectionMatrix = mat4.create();
         this.verticalViewField = Math.PI / 12.0;
         this.aspectRatio = (this.gl.viewportWidth / this.gl.viewportHeight);
-        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        this.gl.enable(this.gl.DEPTH_TEST);
         this.modelViewMatrix = mat4.create();
     };
     Scene.prototype = Object.create(AnimationFrame.prototype);
@@ -76,12 +74,11 @@ var Scene;
     };
     Scene.prototype.configureLighting = function () {
         var cameraMatrix = this.camera.getMatrix();
-        var lightPosition = vec3.fromValues(-720, 800, -600);
+        var lightPosition = vec3.fromValues(333.4, 180, -850);
         this.gl.uniformMatrix4fv(this.shaderProgram.inverseVMatrixUniform, false, mat4.invert(mat4.create(), cameraMatrix));
         vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
-
         this.gl.uniform3fv(this.shaderProgram.lightingPositionUniform, lightPosition);
-        this.gl.uniform3fv(this.shaderProgram.lightLa, [1.0, 1.0, 1.0]);
+        this.gl.uniform3fv(this.shaderProgram.lightLa, [0.25, 0.25, 0.25]);
         this.gl.uniform3fv(this.shaderProgram.lightLd, [1.0, 1.0, 1.0]);
         this.gl.uniform3fv(this.shaderProgram.lightLs, [1.0, 1.0, 1.0]);
         mat4.identity(this.modelViewMatrix);
@@ -94,9 +91,11 @@ var Scene;
         this.drawObject();
     };
     Scene.prototype.drawObject = function () {
+        var mvStack = ModelViewMatrixStack.getInstance();
+        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        this.gl.enable(this.gl.DEPTH_TEST);
         this.configureLighting();
         this.sky.draw(this.modelViewMatrix);
-        var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(this.modelViewMatrix);
         mat4.scale(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(SCENESCALEFACTOR, SCENESCALEFACTOR, SCENESCALEFACTOR));
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, vec3.fromValues(-1 * this.riverMapCenter[0], 0, -1 * this.riverMapCenter[1]));

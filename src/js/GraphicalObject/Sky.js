@@ -18,6 +18,7 @@ var Sky;
 
         var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(modelViewMatrix);
+        mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 2, vec3.fromValues(0, 1, 0));
         mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(-this.cubeSize / 2, this.cubeSize / 2, -this.cubeSize / 2));
         mat4.scale(modelViewMatrix, modelViewMatrix, vec3.fromValues(SKYDIMENSION, SKYDIMENSION, SKYDIMENSION));
         this.cube.draw(modelViewMatrix);

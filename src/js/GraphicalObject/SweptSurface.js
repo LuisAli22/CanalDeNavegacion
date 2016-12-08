@@ -2,11 +2,8 @@
 var SweptSurface;
 (function () {
     "use strict";
-    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints, color, scaleLevelPoint) {
-        GraphicalObject.call(this, graphicContainer, color);
-        this.scaleLevelPoint = scaleLevelPoint;
-        this.scaleFactor = 1;
-        this.color = color;
+    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints) {
+        GraphicalObject.call(this, graphicContainer);
         this.levelPoints = levelPoints.slice(0);
         this.trajectoryPoints = trajectoryPoints.slice(0);
         this.textureScale = 3 / (this.levelPoints.length - 1);
@@ -36,31 +33,18 @@ var SweptSurface;
         this.bufferList.binormal.push(binormal[0], binormal[1], binormal[2]);
     };
     SweptSurface.prototype.loadPositionNormalBinormalTangentData = function (levelPoint, trajectoryPoint) {
-        var scaled = {"position": null, "binormal": null, "normal": null, "tangent": null};
-        scaled.position = vec3.clone(levelPoint.position);
-        scaled.binormal = vec3.clone(levelPoint.binormal);
-        if (this.scaleLevelPoint) {
-            scaled.position[0] = scaled.position[0] * this.scaleFactor + ((1 - this.scaleFactor) / 2);
-            scaled.position[1] = scaled.position[1] * this.scaleFactor + ((1 - this.scaleFactor) / 2);
-        }
-        this.storePointPosition(trajectoryPoint, scaled);
-        this.storePointNormalAndBinormal(trajectoryPoint, scaled);
+        this.storePointPosition(trajectoryPoint, levelPoint);
+        this.storePointNormalAndBinormal(trajectoryPoint, levelPoint);
         this.bufferList.tangent.push(trajectoryPoint.tangent[0], trajectoryPoint.tangent[1], trajectoryPoint.tangent[2]);
-        if (this.color) {
-            this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
-        }
     };
     SweptSurface.prototype.setUpBuffers = function () {
         var u = 0.0;
         var vStep = 1 / (this.levelPoints.length - 1);
-        this.trajectoryPoints.forEach(function (trajectoryPoint, trajectoryIndex, trajectoryPoints) {
+        this.trajectoryPoints.forEach(function (trajectoryPoint) {
             u += this.textureScale;
-            if (this.scaleLevelPoint) {
-                this.scaleFactor = 1 - (0.4 * trajectoryIndex / (trajectoryPoints.length - 1));
-            }
             this.levelPoints.forEach(function (levelPoint, levelIndex) {
                 this.loadPositionNormalBinormalTangentData(levelPoint, trajectoryPoint);
-                this.bufferList.texture_coord.push(levelIndex * vStep, u);
+                this.bufferList.texture_coord.push(levelIndex * vStep + 0.83, u);
             }, this);
         }, this);
         this.loadIndexBufferData(this.levelPoints.length, this.trajectoryPoints.length);

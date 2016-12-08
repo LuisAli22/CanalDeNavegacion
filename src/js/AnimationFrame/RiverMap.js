@@ -9,7 +9,7 @@ var RiverMap;
         this.controlPointsAmount = 3 * this.controlSegmentAmount + 1;
         this.controlPoints = [];
         this.setControlPoints();
-        this.bspline = new Bspline(this.controlPoints, 100, [0, 1, 0]);
+        this.bspline = new Bspline(this.controlPoints, 100, [0, 1, 0], true);
         this.trajectory = [];
         this.equatorDistance = this.graphicContainer.canvas.height * (controlValues.bridgePosition / 100);
         this.origin = vec2.create();

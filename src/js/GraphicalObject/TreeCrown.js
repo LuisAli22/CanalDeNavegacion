@@ -48,7 +48,7 @@ var TreeCrown;
         var curvePoints;
         for (i = 0; i < this.profilesLength; i += 1) {
             profileControlPoints = this.createControlPoints();
-            bSpline = new Bspline(profileControlPoints, this.pointsPerSegment, [-1, 0, 0]);
+            bSpline = new Bspline(profileControlPoints, this.pointsPerSegment, [-1, 0, 0], false);
             curvePoints = bSpline.getCurvePoints();
             this.profiles.push(curvePoints);
         }

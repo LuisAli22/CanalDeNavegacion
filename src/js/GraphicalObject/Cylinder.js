@@ -2,9 +2,8 @@
 var Cylinder;
 (function () {
     "use strict";
-    Cylinder = function (graphicContainer, slices, height, textureStep, color) {
+    Cylinder = function (graphicContainer, slices, height, textureStep) {
         GraphicalObject.call(this, graphicContainer);
-        this.color = color;
         if (textureStep === null) {
             this.textureStep = 6;
         } else {
@@ -31,7 +30,6 @@ var Cylinder;
             k = -1;
         }
         this.bufferList.position.push(0, height, 0);
-        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
         this.bufferList.texture_coord.push(0, 0);
         this.bufferList.normal.push(0, k, 0);
         this.bufferList.binormal.push(k, 0, 0);
@@ -48,7 +46,6 @@ var Cylinder;
             tangent = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), binormal, normal));
             this.bufferList.texture_coord.push(position[0], position[2]);
             this.bufferList.position.push(position[0], position[1], position[2]);
-            this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
             this.bufferList.normal.push(normal[0], normal[1], normal[2]);
             this.bufferList.tangent.push(tangent[0], tangent[1], tangent[2]);
             this.bufferList.binormal.push(binormal[0], binormal[1], binormal[2]);
@@ -60,13 +57,9 @@ var Cylinder;
     Cylinder.prototype.loadPositionAndIndexData = function (currentPoint, nextPoint, currentPointTop, nextPointTop) {
         var firstIndexId = this.bufferList.position.length / 3;
         var secondIndexId = (this.bufferList.position.push(currentPoint.x, currentPoint.y, currentPoint.z)) / 3;
-        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
         var thirdIndexId = (this.bufferList.position.push(nextPoint.x, nextPoint.y, nextPoint.z)) / 3;
-        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
         var fourthIndexId = (this.bufferList.position.push(currentPointTop.x, currentPointTop.y, currentPointTop.z)) / 3;
-        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
         this.bufferList.position.push(nextPointTop.x, nextPointTop.y, nextPointTop.z);
-        this.bufferList.color.push(this.color[0], this.color[1], this.color[2]);
         this.bufferList.index.push(firstIndexId, secondIndexId, thirdIndexId);
         this.bufferList.index.push(secondIndexId, thirdIndexId, fourthIndexId);
     };

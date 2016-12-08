@@ -58,7 +58,6 @@ var Grass;
             this.bufferList.normal.push(element.normal[XCOORDINATE], element.normal[YCOORDINATE], element.normal[ZCOORDINATE]);
             this.bufferList.binormal.push(element.binormal[XCOORDINATE], element.binormal[YCOORDINATE], element.binormal[ZCOORDINATE]);
             this.bufferList.texture_coord.push(v, u);
-            this.bufferList.color.push(0x66, 0xff, 0x66);
         }, this);
         this.loadIndexBufferData(this.grassVertexAmountInABank, this.bufferList.position.length / (3 * this.grassVertexAmountInABank));
         this.bindBuffers();

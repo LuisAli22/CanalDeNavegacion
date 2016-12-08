@@ -169,24 +169,21 @@ var Calculator = (function () {
 
                 return [vec3.normalize([], binormal), vec3.normalize(vec3.create(), vec3.fromValues(n[0] / l, n[1] / l, n[2] / l)), vec3.normalize(vec3.create(), tangent)];
             },
-            towerMainLevelGeometry: function (storeByThreeValues) {
+            towerMainLevelGeometry: function () {
                 var i;
                 var x;
                 var y;
                 var pointsAmount = 12;
                 var geometry = [];
-                var binormal1;
-                var binormal2;
+                /* var binormal1;
+                 var binormal2;*/
                 for (i = 0; i <= pointsAmount; i += 1) {
                     x = setXValue(i);
                     y = setYValue(i, pointsAmount);
-                    binormal1 = createBinormalXSense(i);
+                    geometry.push(vec3.fromValues(x, 0, y));
+                    /*     binormal1 = createBinormalXSense(i);
                     binormal2 = createBinormalYSense(i);
-                    /*geometry.push({"position": vec3.fromValues(x, y, 0), "binormal": binormal2, "normal": null, "tangent": null});
-                     geometry.push({"position": vec3.fromValues(x, y, 0), "binormal": binormal1, "normal": null, "tangent": null});*/
                     if (storeByThreeValues) {
-                        /*binormal1 = createBinormalXSense(i);
-                         binormal2 = createBinormalYSense(i);*/
                         geometry.push({
                             "position": vec3.fromValues(x, y, 0),
                             "binormal": binormal2,
@@ -207,7 +204,7 @@ var Calculator = (function () {
                             "normal": null,
                             "tangent": null
                         });
-                    }
+                     }*/
                 }
                 return geometry.slice(0);
             },

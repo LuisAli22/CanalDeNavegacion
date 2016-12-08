@@ -29,7 +29,7 @@ var Bridge;
         this.tensor2 = new BridgeTensor(graphicContainer, this.rightSideTensorTrajectory, 0.125);
     };
     Bridge.prototype.createCurve = function (trajectory, controlPoints) {
-        var bSpline = new Bspline(controlPoints, 5, [0, 0, 1]);
+        var bSpline = new Bspline(controlPoints, 5, [0, 0, 1], true);
         var curvePoints = bSpline.getCurvePoints();
         curvePoints.forEach(function (element) {
             trajectory.push(element);

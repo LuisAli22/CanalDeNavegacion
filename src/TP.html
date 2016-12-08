@@ -48,6 +48,7 @@
     <script type="text/javascript" src="js/GraphicalObject/Tower.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/BridgeTensor.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Bridge.js"></script>
+    <script type="text/javascript" src="js/GraphicalObject/Grid.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Water.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Basin.js"></script>
     <script type="text/javascript" src="js/GraphicalObject/Ground.js"></script>
@@ -230,14 +231,15 @@
     			vec3 lightDir = normalize(uLight.Position - vertPos);
                 vec3 lightReflectDir = reflect(-lightDir, normal);
     			vec3 viewDir = normalize(-vertPos);
-
+                vec3 ambient = uLight.La * uMaterial.Ka;
     			float lambertian = max(dot(lightDir,normal), 0.0);
-    			float specular = 0.0;
+    			vec3 diffuse = lambertian * uLight.Ld * uMaterial.Kd;
+    			vec3 specular = vec3(0.0);
                 if(lambertian > 0.0) {
        				float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
-       				specular = pow(specAngle, uMaterial.Shininess);
+       				specular = uLight.Ls * uMaterial.Ks * pow(specAngle, uMaterial.Shininess);
     			}
-    			vec3 vLight = uLight.La * uMaterial.Ka + lambertian * uLight.Ld * uMaterial.Kd + specular * uLight.Ls * uMaterial.Ks;
+    			vec3 vLight = ambient + diffuse + specular;
 
     			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
     			if (uUseBlending) {
@@ -248,7 +250,7 @@
 					if (uDrawSkyBox) {
     					gl_FragColor = cubemapColor;
     				} else {
-						gl_FragColor = vec4(mix(textureColor, cubemapColor, uReflectFactor).rgb * vLight, textureColor.a);
+						gl_FragColor = vec4(mix(textureColor, cubemapColor, uReflectFactor).rgb * vLight, textureColor.a).rgba;
     				}
     			} else {
 					gl_FragColor = vec4(textureColor.rgb * vLight, textureColor.a);

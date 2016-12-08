@@ -6,7 +6,7 @@ var BridgeTensor;
         this.radius = radius;
         this.levelGeometry = [];
         this.createLevelGeometry();
-        this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory, [0xFF, 0x00, 0x00]);
+        this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory);
     };
     BridgeTensor.prototype.createLevelGeometry = function () {
         var angle;
@@ -15,6 +15,8 @@ var BridgeTensor;
         var y;
         var calculator = Calculator.getInstance();
         var stepAngle = Math.PI / 24;
+        var rotationMatrix = mat4.create();
+        mat4.rotateZ(rotationMatrix, rotationMatrix, Math.PI / 2);
         for (angle = 0; angle <= 2 * Math.PI; angle += stepAngle) {
             x = this.radius * Math.cos(angle);
             y = this.radius * Math.sin(angle);
