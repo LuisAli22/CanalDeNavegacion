@@ -2,9 +2,15 @@
 var Cube;
 (function () {
     "use strict";
-    Cube = function (graphicContainer) {
+    Cube = function (graphicContainer, textureScaleU, textureScaleV) {
         GraphicalObject.call(this, graphicContainer);
-        this.size = 1;
+        if (textureScaleU === null) {
+            this.textureScaleU = 1;
+        }
+        this.textureScaleV = textureScaleV;
+        if (textureScaleV === null) {
+            this.textureScaleV = 1;
+        }
         this.setUpBuffers();
     };
     Cube.prototype = Object.create(GraphicalObject.prototype);
@@ -33,22 +39,22 @@ var Cube;
             -0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5];
         this.bufferList.texture_coord = [
             // Front
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size,
+            0.0, 0.0, this.textureScaleV, 0.0, this.textureScaleV, this.textureScaleU, 0.0, this.textureScaleU,
 
             // Back
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size,
+            0.0, 0.0, this.textureScaleU, 0.0, this.textureScaleU, this.textureScaleV, 0.0, this.textureScaleV,
 
             // Top
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size,
+            0.0, 0.0, this.textureScaleU, 0.0, this.textureScaleU, this.textureScaleV, 0.0, this.textureScaleV,
 
             // Bottom
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size,
+            0.0, 0.0, this.textureScaleU, 0.0, this.textureScaleU, this.textureScaleV, 0.0, this.textureScaleV,
 
             // Right
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size,
+            0.0, 0.0, this.textureScaleU, 0.0, this.textureScaleU, this.textureScaleV, 0.0, this.textureScaleV,
 
             // Left
-            0.0, 0.0, this.size, 0.0, this.size, this.size, 0.0, this.size];
+            0.0, 0.0, this.textureScaleV, 0.0, this.textureScaleV, this.textureScaleU, 0.0, this.textureScaleU];
         this.bufferList.normal = [
             // Front
             0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,

@@ -16,15 +16,13 @@ var Bspline;
         this.controlPoints.forEach(function (element, index) {
             this.slidingWindow.push(index);
         }, this);
-        if (this.interpolateExtreme) {
-            this.slidingWindow.push(this.controlPoints.length - 1);
-        }
+        this.slidingWindow.push(this.controlPoints.length - 1);
     };
     Bspline.prototype.calculateCurvePointAndStoreIt = function (points, firstIndex, secondIndex, thirdIndex) {
         for (var j = 0; j < this.pointsPerSegment; j++) {
             var t = ((1 / (this.pointsPerSegment - 1)) * j);
             if (t === 0 && firstIndex > 0 && !this.interpolateExtreme) continue;
-            if (t === 0 && this.interpolateExtreme) continue;
+            if ((t === 0 || t === 1) && this.interpolateExtreme) continue;
             //Calculo la funciÃ³n
             var b0 = Math.pow(t, 2) / 2;
             var b1 = -Math.pow(t, 2) + t + 1 / 2;
@@ -72,6 +70,6 @@ var Bspline;
         for (var i = 0; i < segments; ++i) {
             this.calculateCurvePointAndStoreIt(points, i, i + 1, i + 2);
         }
-        return points;
+        return points.slice(0);
     };
 }());

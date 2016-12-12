@@ -4,6 +4,8 @@ var TreeCrown;
     "use strict";
     TreeCrown = function (graphicContainer, slices, pointsPerSegment) {
         this.graphicContainer = graphicContainer;
+        this.gl = graphicContainer.getContext();
+        this.shaderProgram = graphicContainer.getShaderProgram();
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
         this.crownTexture = this.textureHandler.initializeTexture("img/hojas.jpg");
         this.materialKa = [0.3, 0.3, 0.3];
@@ -55,8 +57,10 @@ var TreeCrown;
     };
 
     TreeCrown.prototype.draw = function (modelViewMatrix) {
+        this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
         this.textureHandler.setTextureUniform(this.crownTexture);
         this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess);
         this.crown.draw(modelViewMatrix);
+        this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
     };
 }());

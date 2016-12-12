@@ -175,6 +175,7 @@
 
     <script id="shader-fs" type="x-shader/x-fragment">
 			uniform bool uUseNormalMap;
+			uniform bool uUseDiffuseMap;
 			precision mediump float;
 			uniform sampler2D uSampler;
 			uniform sampler2D uNormalSampler;
@@ -213,7 +214,23 @@
 			};
 
 			uniform Material uMaterial;
-
+            vec3 phongModel (vec3 vertPos, vec3 normal, bool useDiffuse) {
+                vec3 lightDir = normalize(uLight.Position - vertPos);
+                vec3 lightReflectDir = reflect(-lightDir, normal);
+                vec3 viewDir = normalize(-vertPos);
+                vec3 ambient = uLight.La * uMaterial.Ka;
+                float lambertian = max(dot(lightDir,normal), 0.0);
+                vec3 diffuse = lambertian * uLight.Ld * uMaterial.Kd;
+                vec3 specular = vec3(0.0);
+                if(lambertian > 0.0) {
+                    float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
+                    specular = uLight.Ls * uMaterial.Ks * pow(specAngle, uMaterial.Shininess);
+                }
+                if (useDiffuse) {
+    			    return diffuse;
+    			}
+                return ambient + diffuse + specular;
+           }
 			void main() {
     			vec3 normal = normalize(normalInterp);
 
@@ -227,19 +244,7 @@
     				//Transform the normal vector in the RGB channels to tangent space
     				normal = normalize(tbn * normalCoordinate);
     			}
-
-    			vec3 lightDir = normalize(uLight.Position - vertPos);
-                vec3 lightReflectDir = reflect(-lightDir, normal);
-    			vec3 viewDir = normalize(-vertPos);
-                vec3 ambient = uLight.La * uMaterial.Ka;
-    			float lambertian = max(dot(lightDir,normal), 0.0);
-    			vec3 diffuse = lambertian * uLight.Ld * uMaterial.Kd;
-    			vec3 specular = vec3(0.0);
-                if(lambertian > 0.0) {
-       				float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
-       				specular = uLight.Ls * uMaterial.Ks * pow(specAngle, uMaterial.Shininess);
-    			}
-    			vec3 vLight = ambient + diffuse + specular;
+    			vec3 vLight = phongModel(vertPos, normal, uUseDiffuseMap);
 
     			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
     			if (uUseBlending) {
@@ -264,14 +269,13 @@
         var riverMap;
         var keyboardController;
         var controlValues = {
-            alturaMaxima: 10,
             reiniciar: function () {
                 refreshScene();
             },
             ph1: 5,
-            ph2: 5,
-            ph3: 5,
-            s1: 1,
+            ph2: 2,
+            ph3: 2,
+            s1: 4,
             towerAmount: 2,
             bridgePosition: 50
         };

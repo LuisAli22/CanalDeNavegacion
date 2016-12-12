@@ -29,7 +29,6 @@ var Ground;
     };
     Ground.prototype.draw = function (modelViewMatrix) {
         this.basin.draw(modelViewMatrix);
-        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, 4);
         this.grassLeft.draw(modelViewMatrix);
         this.grassRight.draw(modelViewMatrix);
         this.street.draw(modelViewMatrix);

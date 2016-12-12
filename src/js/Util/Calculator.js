@@ -4,43 +4,6 @@ var Calculator = (function () {
     var instance;
 
     function init() {
-        function createTangent(previousPointPosition, element) {
-            var newTangent = vec3.create();
-            vec3.scale(previousPointPosition, previousPointPosition, -1);
-            vec3.add(newTangent, previousPointPosition, element);
-            vec3.normalize(newTangent, newTangent);
-            vec3.scale(previousPointPosition, previousPointPosition, -1);
-            return newTangent;
-        }
-
-        function crossProductAndNormalize(firstVectorOperand, secondVectorOperand) {
-            var resultVector = vec3.create();
-            vec3.cross(resultVector, firstVectorOperand, secondVectorOperand);
-            vec3.normalize(resultVector, resultVector);
-            return resultVector;
-        }
-
-        function storeTangentNormalAndBinormal(previousPointPosition, currentPointPosition, geometry, isLastPoint) {
-            var tangent = createTangent(previousPointPosition, currentPointPosition);
-            if (isLastPoint) {
-                vec3.scale(tangent, tangent, -1);
-            }
-            var binormal;
-            var normal;
-            if (previousPointPosition[0] === 0 && previousPointPosition[1] === 0 && previousPointPosition[2] === 0) {
-                normal = crossProductAndNormalize(vec3.fromValues(1, 0, 1), tangent);
-                binormal = crossProductAndNormalize(normal, tangent);
-            } else {
-                binormal = crossProductAndNormalize(previousPointPosition, tangent);//(tangent, previousPointPosition);
-                normal = crossProductAndNormalize(binormal, tangent);
-            }
-            geometry.push({
-                "position": previousPointPosition,
-                "tangent": tangent,
-                "normal": normal,
-                "binormal": binormal
-            });
-        }
 
         function setNeighbors(top, right, bottom, left, neighbors, vertexXIndex, vertexZIndex, vertexIndex, zMax, circular) {
             if (top) {
@@ -98,34 +61,7 @@ var Calculator = (function () {
             }
             return 0;
         }
-
-        function createBinormalXSense(index) {
-            if ((index === 0) || (index === 3) || (index === 4) || (index === 7) || (index === 8) || (index === 11) || (index === 12)) {
-                return vec3.fromValues(-1, 0, 0).slice(0);
-            }
-            return vec3.fromValues(1, 0, 0).slice(0);
-        }
-
-        function createBinormalYSense(index) {
-            if ((index <= 5) || (index === 12)) {
-                return vec3.fromValues(0, -1, 0).slice(0);
-            }
-            return vec3.fromValues(0, 1, 0).slice(0);
-        }
         return {
-            storePositionsTangentNormalAndBinormal: function (positions, geometry) {
-                var previousPointPosition = vec3.create();
-                positions.forEach(function (element, index) {
-                    if (index === 0) {
-                        previousPointPosition = vec3.clone(element);
-                    } else {
-                        storeTangentNormalAndBinormal(previousPointPosition, element, geometry, false);
-                        previousPointPosition = vec3.clone(element);
-                    }
-                }, this);
-                var lastPointIndex = positions.length - 1;
-                storeTangentNormalAndBinormal(positions[lastPointIndex], positions[lastPointIndex - 1], geometry, true);
-            },
             calculateNormalFromNeighbors: function (vertexZIndex, vertexXIndex, vertexPositionData, zMax, xMax, circular) {
                 var neighbors = [];
                 var top = (vertexXIndex === (xMax - 1));
@@ -175,54 +111,13 @@ var Calculator = (function () {
                 var y;
                 var pointsAmount = 12;
                 var geometry = [];
-                /* var binormal1;
-                 var binormal2;*/
                 for (i = 0; i <= pointsAmount; i += 1) {
                     x = setXValue(i);
                     y = setYValue(i, pointsAmount);
                     geometry.push(vec3.fromValues(x, 0, y));
-                    /*     binormal1 = createBinormalXSense(i);
-                    binormal2 = createBinormalYSense(i);
-                    if (storeByThreeValues) {
-                        geometry.push({
-                            "position": vec3.fromValues(x, y, 0),
-                            "binormal": binormal2,
-                            "normal": null,
-                            "tangent": null
-                        });
-                        geometry.push({
-                            "position": vec3.fromValues(x, y, 0),
-                            "binormal": binormal1,
-                            "normal": null,
-                            "tangent": null
-                        });
-                    } else {
-                        //geometry.push(x, y, 0);
-                        geometry.push({
-                            "position": vec3.fromValues(x, y, 0),
-                            "binormal": binormal1,
-                            "normal": null,
-                            "tangent": null
-                        });
-                     }*/
                 }
                 return geometry.slice(0);
             },
-            multiplyMatrixByVector: function (matrix, vector) {
-                var product = vec4.create();
-                var addition = 0;
-                matrix.forEach(function (element, index) {
-                    if (((index % 4) === 0) && (index !== 0)) {
-                        product[Math.floor((index - 1) / 4)] = addition;
-                        addition = 0;
-                    }
-                    addition += element * vector[index % 4];
-                    if (index === matrix.length - 1) {
-                        product[Math.floor((index) / 4)] = addition;
-                    }
-                });
-                return product.slice(0);
-            }
         };
     }
 

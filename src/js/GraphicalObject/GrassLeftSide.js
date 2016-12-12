@@ -26,17 +26,43 @@ var GrassLeftSide;
         var z = this.sandPositions[index + 2];
         var stepDistanceBetweenVertex = (this.grassLimit - (xCoordinate)) / (this.grassVertexAmountInABank - 1);
         var currentIndex;
+        var position;
+        var binormal = vec3.fromValues(0, -1, 0);
+        var tangent = vec3.fromValues(1, 0, 0);
+        var normal = vec3.cross(vec3.create(), tangent, binormal);
         if (stepDistanceBetweenVertex > 0) {
-            this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
+            position = vec3.fromValues(xCoordinate, y, z);
+            //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+            this.loadBufferList({
+                "position": position,
+                "normal": normal,
+                "tangent": tangent,
+                "binormal": binormal
+            }, 0, 0);
             this.createRandomTree(xCoordinate, y, z);
             for (currentIndex = 0; currentIndex < this.grassVertexAmountInABank - 2; currentIndex += 1) {
                 xCoordinate += stepDistanceBetweenVertex;
-                this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
+                position = vec3.fromValues(xCoordinate, y, z);
+                //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+                this.loadBufferList({
+                    "position": position,
+                    "normal": normal,
+                    "tangent": tangent,
+                    "binormal": binormal
+                }, 1 / 256, 1 / 256);
                 if (currentIndex === 0) {
                     this.setRiverStreetIntersection(z, xCoordinate, 1);
                 }
             }
-            this.grassPositions.push(vec3.fromValues(this.grassLimit, y, z));
+            position = vec3.fromValues(this.grassLimit, y, z);
+            ///
+            // this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+            this.loadBufferList({
+                "position": position,
+                "normal": normal,
+                "tangent": tangent,
+                "binormal": binormal
+            }, 1, 1);
         }
     };
 }());

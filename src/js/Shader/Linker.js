@@ -53,6 +53,7 @@ var Linker;
         this.shaderProgram.waveTimeUniform = this.gl.getUniformLocation(this.shaderProgram, "uWaveTime");
 
         this.shaderProgram.useNormalMap = this.gl.getUniformLocation(this.shaderProgram, "uUseNormalMap");
+        this.shaderProgram.useDiffuseMap = this.gl.getUniformLocation(this.shaderProgram, "uUseDiffuseMap");
 
         this.shaderProgram.useBlendingUniform = this.gl.getUniformLocation(this.shaderProgram, "uUseBlending");
         this.shaderProgram.alphaUniform = this.gl.getUniformLocation(this.shaderProgram, "uAlpha");

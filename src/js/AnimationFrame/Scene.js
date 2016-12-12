@@ -20,10 +20,11 @@ var Scene;
         this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
         this.sky = new Sky(this.graphicContainer);
         this.ground = new Ground(this.graphicContainer, riverMap);
-        this.cameras = {
+        this.cameras = {"Orbital": new Orbital(this.graphicContainer, 500, 0.39 * Math.PI, 1.6 * Math.PI)};
+        /*this.cameras = {
             "Orbital": new Orbital(this.graphicContainer, 500, 0.39 * Math.PI, 1.6 * Math.PI),
             "Pedestrian": new PedestrianCamera(this.graphicContainer, this.ground.getStreet())
-        };
+         };*/
         this.currentCameraIndex = "Orbital";
         this.camera = this.cameras[this.currentCameraIndex];
         this.camera.update();
@@ -74,11 +75,11 @@ var Scene;
     };
     Scene.prototype.configureLighting = function () {
         var cameraMatrix = this.camera.getMatrix();
-        var lightPosition = vec3.fromValues(333.4, 180, -850);
+        var lightPosition = vec3.fromValues(530, 333.4, -720);
         this.gl.uniformMatrix4fv(this.shaderProgram.inverseVMatrixUniform, false, mat4.invert(mat4.create(), cameraMatrix));
         vec3.transformMat4(lightPosition, lightPosition, cameraMatrix);
         this.gl.uniform3fv(this.shaderProgram.lightingPositionUniform, lightPosition);
-        this.gl.uniform3fv(this.shaderProgram.lightLa, [0.25, 0.25, 0.25]);
+        this.gl.uniform3fv(this.shaderProgram.lightLa, [0.5, 0.5, 0.5]);
         this.gl.uniform3fv(this.shaderProgram.lightLd, [1.0, 1.0, 1.0]);
         this.gl.uniform3fv(this.shaderProgram.lightLs, [1.0, 1.0, 1.0]);
         mat4.identity(this.modelViewMatrix);

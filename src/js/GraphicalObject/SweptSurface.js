@@ -2,11 +2,14 @@
 var SweptSurface;
 (function () {
     "use strict";
-    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints) {
+    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints, textureScale) {
         GraphicalObject.call(this, graphicContainer);
         this.levelPoints = levelPoints.slice(0);
         this.trajectoryPoints = trajectoryPoints.slice(0);
-        this.textureScale = 3 / (this.levelPoints.length - 1);
+        this.textureScale = textureScale;
+        if (textureScale === null) {
+            this.textureScale = (1 / 16);
+        }
         this.setUpBuffers();
     };
     SweptSurface.prototype = Object.create(GraphicalObject.prototype);
@@ -44,7 +47,7 @@ var SweptSurface;
             u += this.textureScale;
             this.levelPoints.forEach(function (levelPoint, levelIndex) {
                 this.loadPositionNormalBinormalTangentData(levelPoint, trajectoryPoint);
-                this.bufferList.texture_coord.push(levelIndex * vStep + 0.83, u);
+                this.bufferList.texture_coord.push(levelIndex * vStep, u);
             }, this);
         }, this);
         this.loadIndexBufferData(this.levelPoints.length, this.trajectoryPoints.length);

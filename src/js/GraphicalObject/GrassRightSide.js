@@ -27,16 +27,41 @@ var GrassRightSide;
         var stepDistanceBetweenVertex = (this.sandPositions[index] - this.grassLimit) / (this.grassVertexAmountInABank - 1);
         var currentIndex;
         var currentLastPoint;
+        var position;
+        var binormal = vec3.fromValues(0, -1, 0);
+        var tangent = vec3.fromValues(1, 0, 0);
+        var normal = vec3.cross(vec3.create(), tangent, binormal);
         if (stepDistanceBetweenVertex > 0) {
-            this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
+            position = vec3.fromValues(xCoordinate, y, z);
+            //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+            this.loadBufferList({
+                "position": position,
+                "normal": normal,
+                "tangent": tangent,
+                "binormal": binormal
+            }, 0, 0);
             this.createRandomTree(index, y, z);
             for (currentIndex = 0; currentIndex < this.grassVertexAmountInABank - 2; currentIndex += 1) {
                 xCoordinate += stepDistanceBetweenVertex;
-                this.grassPositions.push(vec3.fromValues(xCoordinate, y, z));
+                position = vec3.fromValues(xCoordinate, y, z);
+                //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+                this.loadBufferList({
+                    "position": position,
+                    "normal": normal,
+                    "tangent": tangent,
+                    "binormal": binormal
+                }, currentIndex / 16, currentIndex / 16);
             }
-            currentLastPoint = this.grassPositions[this.grassPositions.length - 1];
+            currentLastPoint = this.bufferList.position[this.bufferList.position.length - 1];//this.grassTangentNormalBinormalAndPositions[this.grassTangentNormalBinormalAndPositions.length - 1].position;
             this.setRiverStreetIntersection(currentLastPoint[2], currentLastPoint[0], -1);
-            this.grassPositions.push(vec3.fromValues(this.sandPositions[index], y, z));
+            position = vec3.fromValues(this.sandPositions[index], y, z);
+            //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
+            this.loadBufferList({
+                "position": position,
+                "normal": normal,
+                "tangent": tangent,
+                "binormal": binormal
+            }, currentIndex / 16, currentIndex / 16);
         }
     };
 }());
