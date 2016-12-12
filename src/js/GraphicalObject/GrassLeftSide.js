@@ -32,31 +32,27 @@ var GrassLeftSide;
         var normal = vec3.cross(vec3.create(), tangent, binormal);
         if (stepDistanceBetweenVertex > 0) {
             position = vec3.fromValues(xCoordinate, y, z);
-            //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
             this.loadBufferList({
                 "position": position,
                 "normal": normal,
                 "tangent": tangent,
                 "binormal": binormal
-            }, 0, 0);
+            }, index / 128, 1 / 2);
             this.createRandomTree(xCoordinate, y, z);
             for (currentIndex = 0; currentIndex < this.grassVertexAmountInABank - 2; currentIndex += 1) {
                 xCoordinate += stepDistanceBetweenVertex;
                 position = vec3.fromValues(xCoordinate, y, z);
-                //this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
                 this.loadBufferList({
                     "position": position,
                     "normal": normal,
                     "tangent": tangent,
                     "binormal": binormal
-                }, 1 / 256, 1 / 256);
+                }, index / 128, currentIndex / 2);
                 if (currentIndex === 0) {
                     this.setRiverStreetIntersection(z, xCoordinate, 1);
                 }
             }
             position = vec3.fromValues(this.grassLimit, y, z);
-            ///
-            // this.grassTangentNormalBinormalAndPositions.push({"position": position, "normal": normal, "tangent": tangent, "binormal": binormal});
             this.loadBufferList({
                 "position": position,
                 "normal": normal,

@@ -32,9 +32,6 @@ var Basin;
     Basin.prototype.getBottomRiver = function () {
         return this.bottomRiver;
     };
-    Basin.prototype.getRiverLevelGeometry = function () {
-        return this.riverLevelGeometry.slice(0);
-    };
     Basin.prototype.createRiverLevelPoints = function () {
         var rotationMatrix = mat4.create();
         mat4.rotate(rotationMatrix, rotationMatrix, Math.PI / 2, vec3.fromValues(0, 0, 1));
