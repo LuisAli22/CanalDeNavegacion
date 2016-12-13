@@ -2,8 +2,8 @@
 var TowerJunction;
 (function () {
     "use strict";
-    TowerJunction = function (graphicContainer, height) {
-        TowerBody.call(this, graphicContainer, height);
+    TowerJunction = function (graphicContainer, height, uTextureScale, vTextureScale) {
+        TowerBody.call(this, graphicContainer, height, uTextureScale, vTextureScale);
     };
     TowerJunction.prototype = Object.create(TowerBody.prototype);
     TowerJunction.prototype.constructor = TowerBody;

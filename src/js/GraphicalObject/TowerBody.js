@@ -2,11 +2,11 @@
 var TowerBody;
 (function () {
     "use strict";
-    TowerBody = function (graphicContainer, height) {
+    TowerBody = function (graphicContainer, height, uTextureScale, vTextureScale) {
         GraphicalObject.call(this, graphicContainer);
         this.height = height;
-        this.uTextureScale = 1 / 4;
-        this.vTextureScale = 1 / 8;
+        this.uTextureScale = uTextureScale;
+        this.vTextureScale = vTextureScale;
         this.xCenter = 0.5;
         this.zCenter = 0.5;
         this.initBuffers();

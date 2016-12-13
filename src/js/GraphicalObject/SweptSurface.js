@@ -2,13 +2,18 @@
 var SweptSurface;
 (function () {
     "use strict";
-    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints, textureScale) {
+    SweptSurface = function (graphicContainer, levelPoints, trajectoryPoints, uTextureScale, vTextureScale, swapTextureCoord) {
         GraphicalObject.call(this, graphicContainer);
+        this.swapTextureCoord = swapTextureCoord;
         this.levelPoints = levelPoints.slice(0);
         this.trajectoryPoints = trajectoryPoints.slice(0);
-        this.textureScale = textureScale;
-        if (textureScale === null) {
-            this.textureScale = (1 / 16);
+        this.uTextureScale = uTextureScale;
+        this.vTextureScale = vTextureScale;
+        if (uTextureScale === null) {
+            this.uTextureScale = (1 / 16);
+        }
+        if (vTextureScale === null) {
+            this.vTextureScale = (1 / 16);
         }
         this.setUpBuffers();
     };
@@ -44,10 +49,14 @@ var SweptSurface;
         var u = 0.0;
         var vStep = 1 / (this.levelPoints.length - 1);
         this.trajectoryPoints.forEach(function (trajectoryPoint) {
-            u += this.textureScale;
+            u += this.uTextureScale;
             this.levelPoints.forEach(function (levelPoint, levelIndex) {
                 this.loadPositionNormalBinormalTangentData(levelPoint, trajectoryPoint);
-                this.bufferList.texture_coord.push(levelIndex * vStep, u);
+                if (this.swapTextureCoord) {
+                    this.bufferList.texture_coord.push(levelIndex * vStep * this.vTextureScale - 0.1, u);
+                } else {
+                    this.bufferList.texture_coord.push(u, levelIndex * vStep * this.vTextureScale);
+                }
             }, this);
         }, this);
         this.loadIndexBufferData(this.levelPoints.length, this.trajectoryPoints.length);

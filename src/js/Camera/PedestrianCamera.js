@@ -9,16 +9,13 @@ var PedestrianCamera;
         this.trajectory = street.getTrajectory();
         this.streetZPosition = street.getZPositionValue();
         this.streetWidth = street.getWidth();
-        this.pedestrianPosition = PEDESTRIANPOSITION;
-        this.personHeight = 1.5 * SCENESCALEFACTOR;
         this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
+        this.pedestrianPositionIndex = Math.floor(this.trajectory.length / 2);
+        this.personHeight = 3 * SCENESCALEFACTOR;
         this.moveAside = false;
     };
     PedestrianCamera.prototype = Object.create(Orbital.prototype);
     PedestrianCamera.prototype.constructor = PedestrianCamera;
-    /* PedestrianCamera.prototype.setModelViewMatrix = function (modelViewMatrix) {
-     this.modelViewMatrix = mat4.clone(modelViewMatrix);
-     };*/
     PedestrianCamera.prototype.setTargetAnEyePositions = function () {
         if (!this.moveAside) {
             this.eye = this.getPedestrianPosition();
@@ -26,32 +23,28 @@ var PedestrianCamera;
         this.target = this.getSpatialCoordinate();
     };
     PedestrianCamera.prototype.getPedestrianPosition = function () {
-        var threeDimensionPoint = vec3.clone(this.trajectory[this.pedestrianPosition].position);
-        var currentPedestrianPoint = vec4.fromValues(threeDimensionPoint[0], threeDimensionPoint[1], threeDimensionPoint[2], 1);
+        var currentPedestrianPoint = vec3.clone(this.trajectory[this.pedestrianPositionIndex].position);
         currentPedestrianPoint[1] += this.personHeight;
         currentPedestrianPoint[0] -= this.riverMapCenter[0];
-        currentPedestrianPoint[1] += this.personHeight;
+        currentPedestrianPoint[0] *= 2.5;
         currentPedestrianPoint[2] = this.streetZPosition - (this.riverMapCenter[1] - (this.streetWidth / 2));
-        return vec3.fromValues(currentPedestrianPoint[0], currentPedestrianPoint[1], currentPedestrianPoint[2]);
-        /*var calculator = Calculator.getInstance();
-         var realPedestrianPoint = calculator.multiplyMatrixByVector(this.modelViewMatrix, currentPedestrianPoint);
-         return vec3.fromValues(realPedestrianPoint[0], realPedestrianPoint[1], realPedestrianPoint[2]);*/
+        return currentPedestrianPoint.slice(0);
     };
     PedestrianCamera.prototype.moveBackwardOrForward = function (moveSense) {
-        this.pedestrianPosition += moveSense;
-        this.pedestrianPosition = Math.min(this.pedestrianPosition, this.trajectory.length);
-        this.pedestrianPosition = Math.max(this.pedestrianPosition, 0);
+        this.pedestrianPositionIndex += moveSense;
+        this.pedestrianPositionIndex = Math.min(this.pedestrianPositionIndex, this.trajectory.length - 1);
+        this.pedestrianPositionIndex = Math.max(this.pedestrianPositionIndex, 0);
         this.update();
     };
     PedestrianCamera.prototype.moveForward = function () {
-        var moveSense = -10;
+        var moveSense = -1;
         if (Math.cos(this.phi) >= 0) {
             moveSense *= -1;
         }
         this.moveBackwardOrForward(moveSense);
     };
     PedestrianCamera.prototype.moveBackward = function () {
-        var moveSense = 10;
+        var moveSense = 1;
         if (Math.cos(this.phi) >= 0) {
             moveSense *= -1;
         }

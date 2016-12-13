@@ -20,11 +20,10 @@ var Scene;
         this.riverMapCenter = vec2.clone(riverMap.getCurveCenter());
         this.sky = new Sky(this.graphicContainer);
         this.ground = new Ground(this.graphicContainer, riverMap);
-        this.cameras = {"Orbital": new Orbital(this.graphicContainer, 500, 0.39 * Math.PI, 1.6 * Math.PI)};
-        /*this.cameras = {
+        this.cameras = {
             "Orbital": new Orbital(this.graphicContainer, 500, 0.39 * Math.PI, 1.6 * Math.PI),
             "Pedestrian": new PedestrianCamera(this.graphicContainer, this.ground.getStreet())
-         };*/
+        };
         this.currentCameraIndex = "Orbital";
         this.camera = this.cameras[this.currentCameraIndex];
         this.camera.update();

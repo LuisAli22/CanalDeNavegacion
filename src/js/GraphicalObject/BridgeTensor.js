@@ -2,11 +2,11 @@
 var BridgeTensor;
 (function () {
     "use strict";
-    BridgeTensor = function (graphicContainer, trajectory, radius) {
+    BridgeTensor = function (graphicContainer, trajectory, radius, uTextureScale, vTextureScale) {
         this.radius = radius;
         this.levelGeometry = [];
         this.createLevelGeometry();
-        this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory);
+        this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory, uTextureScale, vTextureScale, false);
     };
     BridgeTensor.prototype.createLevelGeometry = function () {
         var angle;

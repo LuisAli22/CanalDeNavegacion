@@ -26,25 +26,33 @@ var TextureHandler = (function () {
                 gl.generateMipmap(gl.TEXTURE_2D);
                 gl.bindTexture(gl.TEXTURE_2D, null);
             },
-            initializeTexture: function (texturePath) {
+            initializeTexture: function (texturePaths) {
+                var textures = [];
                 var currrentTextureHandler = this;
-                var texture = gl.createTexture();
-                texture.image = new Image();
-                texture.image.onload = function () {
-                    currrentTextureHandler.generateMipMap(texture);
-                };
-                texture.image.src = texturePath;
-                return texture;
+                texturePaths.forEach(function (path) {
+                    var texture = gl.createTexture();
+                    texture.image = new Image();
+                    texture.image.onload = function () {
+                        currrentTextureHandler.generateMipMap(texture);
+                    };
+                    texture.image.src = path;
+                    textures.push(texture);
+                }, this);
+                return textures.slice(0);
             },
-            setTextureUniform: function (texture) {
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.uniform1i(shaderProgram.samplerUniform, 0);
+            setTextureUniform: function (textures) {
+                textures.forEach(function (texture, index) {
+                    gl.activeTexture(gl.TEXTURE0 + index);
+                    gl.bindTexture(gl.TEXTURE_2D, texture);
+                    gl.uniform1i(shaderProgram.samplerUniform, index);
+                }, this);
             },
-            setTextureNormal: function (texture) {
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.uniform1i(shaderProgram.samplerNormal, 1);
+            setTextureNormal: function (normalTextures, textureUnitIndex) {
+                normalTextures.forEach(function (normalTexture, index) {
+                    gl.activeTexture(gl.TEXTURE0 + textureUnitIndex + index);
+                    gl.bindTexture(gl.TEXTURE_2D, normalTexture);
+                    gl.uniform1i(shaderProgram.samplerNormal, textureUnitIndex + index);
+                }, this);
             },
             setCubemapTextureUniform: function (texture) {
                 gl.activeTexture(gl.TEXTURE2);
