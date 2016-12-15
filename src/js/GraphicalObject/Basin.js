@@ -5,8 +5,8 @@ var Basin;
     "use strict";
     Basin = function (graphicContainer, riverWidth, levelControlPointsAmount, riverWidthStep) {
         this.graphicContainer = graphicContainer;
-        this.shaderProgram = graphicContainer.getShaderProgram();
         this.gl = graphicContainer.getContext();
+        this.terrainShaderProgram = graphicContainer.getTerrainShaderProgram();
         this.bottomRiverUnseted = true;
         this.bottomRiver = 0;
         this.levelControlPointsAmount = levelControlPointsAmount;
@@ -14,55 +14,30 @@ var Basin;
         this.riverWidth = riverWidth;
         this.riverLevelGeometry = [];
         this.riverDepthStep = -2 * (controlValues.ph1) / this.levelControlPointsAmount;
-        this.treesPositions = [];
         this.createRiverLevelPoints();
-        this.sweptSurface = new SweptSurface(graphicContainer, this.riverLevelGeometry, riverMap.trajectory, 1 / 25, 10, false);
+        this.sweptSurface = new SweptSurface(graphicContainer, this.riverLevelGeometry, riverMap.trajectory, 1, 1, false);
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.texture = this.textureHandler.initializeTexture(["img/arena.jpg"]);
-        this.textureNormal = this.textureHandler.initializeTexture(["img/arena-normalmap.jpg"]);
+        this.sandTexture = this.textureHandler.initializeTexture("img/arena.jpg");
+        this.sandNormalTexture = this.textureHandler.initializeTexture("img/arena-normalmap.jpg");
+        this.grassTexture = this.textureHandler.initializeTexture("img/pasto1.jpg");
+        this.grassNormalTexture = this.textureHandler.initializeTexture("img/pasto1-normalmap.jpg");
+        this.rockTexture = this.textureHandler.initializeTexture("img/rocas2.jpg");
+        this.rockNormalTexture = this.textureHandler.initializeTexture("img/rocas2-normalmap.jpg");
         this.materialKa = [0.3, 0.3, 0.3];
         this.materialKd = [0.9, 0.9, 0.9];
         this.materialKs = [0.1, 0.1, 0.1];
         this.materialShininess = 4.0;
-        this.pointsPerSegment = 10;
-        this.slices = 24;
-        this.treeKindNumber = 4;
-        var i;
-        this.indexesTrees = [];
-        this.trees = [];
-        for (i = 0; i < this.treeKindNumber; i += 1) {
-            this.indexesTrees.push(Math.floor(Math.random() * this.treeKindNumber));
-            this.trees.push(new Tree(this.graphicContainer, this.slices, this.pointsPerSegment, true));
-        }
-        this.setTreesPositions();
     };
-    Basin.prototype.createRandomTree = function (xCoordinate, y, z, lineNumber) {
-        var coinValue = Math.floor((Math.random() * 110) + 1) - 1;
-        var lineCoinValue = Math.floor((Math.random() * lineNumber) + 1) - 1;
-        if ((coinValue >= 2 && coinValue <= 4) && (lineCoinValue <= (lineNumber * 0.2))) {
-            this.treesPositions.push([xCoordinate, y, z]);
-        }
-    };
-    Basin.prototype.setTreesPositions = function () {
-        var positions = this.sweptSurface.getPositionBuffer();
-        var i;
-        var lineNumber = 1;
-        for (i = 0; i < positions.length; i += 3) {
-            if (i % 24 === 0 && i !== 0) {
-                lineNumber += 1;
-            }
-            if ((positions[i + 1] === 0) && positions[i] > 0 && positions[i] < 360) {
-                this.createRandomTree(positions[i], positions[i + 1], positions[i + 2], lineNumber);
-            }
-        }
+    Basin.prototype.getRiverWidth = function () {
+        return this.riverWidth;
     };
     Basin.prototype.getLeftEdge = function () {
         var center = riverMap.getCurveCenter();
-        return center[0] + (this.riverWidth);
+        return center[0] - (this.riverWidth);
     };
     Basin.prototype.getRightEdge = function () {
         var center = riverMap.getCurveCenter();
-        return center[0] - (this.riverWidth);
+        return center[0] + (this.riverWidth);
     };
     Basin.prototype.recordYValueBottomRiver = function (y) {
         if (this.bottomRiverUnseted) {
@@ -141,7 +116,7 @@ var Basin;
                 "normal": normal,
                 "tangent": tangent
             });
-            xCoordinate += ((controlPointIndex < 1) || (controlPointIndex > 5)) ? this.riverWidthStep / 4 : this.riverWidthStep;
+            xCoordinate += this.riverWidthStep / 4;
             yCoordinate += 2 * this.riverDepthStep;
         }
     };
@@ -151,26 +126,18 @@ var Basin;
         this.fillRightSide();
     };
     Basin.prototype.draw = function (modelViewMatrix) {
-        this.textureHandler.setTextureUniform(this.texture);
-        this.textureHandler.setTextureNormal(this.textureNormal, this.texture.length);
-        this.gl.uniform1i(this.shaderProgram.useNormalMap, 1);
-        //this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
-        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess);
+        this.textureHandler.setSandTextureUniform(this.sandTexture);
+        this.textureHandler.setSandNormalTextureUniform(this.sandNormalTexture);
+        this.textureHandler.setGrassTextureUniform(this.grassTexture);
+        this.textureHandler.setGrassNormalTextureUniform(this.grassNormalTexture);
+        this.textureHandler.setRockTextureUniform(this.rockTexture);
+        this.textureHandler.setRockNormalTextureUniform(this.rockNormalTexture);
+        this.gl.uniform1i(this.terrainShaderProgram.useNormalMap, 1);
+        this.gl.uniform1i(this.terrainShaderProgram.useDiffuseMap, 1);
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess, true);
         this.sweptSurface.draw(modelViewMatrix);
-        this.gl.uniform1i(this.shaderProgram.useNormalMap, 0);
-        //this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
-
-        var i;
-        var treePosition;
-        var mvStack;
-        for (i = 0; i < this.treesPositions.length; i += 1) {
-            treePosition = this.treesPositions[i];
-            mvStack = ModelViewMatrixStack.getInstance();
-            mvStack.push(modelViewMatrix);
-            mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(treePosition[0], treePosition[1], treePosition[2]));
-            this.trees[this.indexesTrees[i % this.treeKindNumber]].draw(modelViewMatrix);
-            mat4.copy(modelViewMatrix, mvStack.pop());
-        }
+        this.gl.uniform1i(this.terrainShaderProgram.useNormalMap, 0);
+        this.gl.uniform1i(this.terrainShaderProgram.useDiffuseMap, 0);
     };
     Basin.prototype.getPositionBuffer = function () {
         return this.sweptSurface.getPositionBuffer();

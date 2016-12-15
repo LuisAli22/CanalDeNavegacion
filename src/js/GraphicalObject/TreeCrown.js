@@ -6,9 +6,8 @@ var TreeCrown;
         this.graphicContainer = graphicContainer;
         this.gl = graphicContainer.getContext();
         this.shaderProgram = graphicContainer.getShaderProgram();
-        this.texturesPaths = ["img/hojas.jpg"];
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.textures = this.textureHandler.initializeTexture(this.texturesPaths);
+        this.texture = this.textureHandler.initializeTexture("img/hojas.jpg");
         this.materialKa = [0.3, 0.3, 0.3];
         this.materialKd = [0.9, 0.9, 0.9];
         this.materialKs = [0.0, 0.0, 0.0];
@@ -59,8 +58,8 @@ var TreeCrown;
 
     TreeCrown.prototype.draw = function (modelViewMatrix) {
         this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
-        this.textureHandler.setTextureUniform(this.textures);
-        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess);
+        this.textureHandler.setTextureUniform(this.texture);
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess, false);
         this.crown.draw(modelViewMatrix);
         this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
     };

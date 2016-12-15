@@ -13,19 +13,24 @@ var Street;
         this.streetZPositionValue = ((controlValues.bridgePosition / 100) * 360) - (this.width / 2);
         this.levelGeometry = [];
         this.borderHeight = 0.25;
+        this.levelPoints = 36;
         this.createStreetLevelPoints();
         this.streetTrajectory = [];
         this.createStreetTrajectory();
         this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.streetTexture = this.textureHandler.initializeTexture(["img/tramo-doblemarilla.jpg"]);
-        this.streetNormalTexture = this.textureHandler.initializeTexture(["img/tramo-doblemarilla-normalmap.jpg"]);
-        this.sideWalkTexture = this.textureHandler.initializeTexture(["img/vereda.jpg"]);
-        this.sideWalkNormalTexture = this.textureHandler.initializeTexture(["img/vereda-normalmap.jpg"]);
+        this.streetTexture = this.textureHandler.initializeTexture("img/tramo-doblemarilla.jpg");
+        this.streetNormalTexture = this.textureHandler.initializeTexture("img/tramo-doblemarilla-normalmap.jpg");
+        this.sideWalkTexture = this.textureHandler.initializeTexture("img/vereda.jpg");
+        this.sideWalkNormalTexture = this.textureHandler.initializeTexture("img/vereda-normalmap.jpg");
         this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, this.streetTrajectory, 0.5, 1.5, true);
         this.createSideWalkLevelPoints();
         this.sideWalk = new SweptSurface(graphicContainer, this.levelGeometry, this.streetTrajectory, 3, 5, true);
         this.createLeftSideWalkLevelPoints();
         this.sideLeftWalk = new SweptSurface(graphicContainer, this.levelGeometry, this.streetTrajectory, 3, 5, true);
+        this.materialKa = [0.3, 0.3, 0.3];
+        this.materialKd = [0.9, 0.9, 0.9];
+        this.materialKs = [0.9, 0.9, 0.9];
+        this.materialShininess = 4.0;
     };
     Street.prototype.getZPositionValue = function () {
         return this.streetZPositionValue;
@@ -112,23 +117,32 @@ var Street;
         this.setBinormalTangentNormalValues(vec3.fromValues(this.width - (TOWERWIDTH * TOWERSCALEFACTOR / 2), this.borderHeight, 0), binormal5);
     };
     Street.prototype.streetRiverLeftSide = function () {
-        var x;
+        var x = 0;
+        var i;
+        var step = this.riverLeftSideLimit / (this.levelPoints - 1);
         var controlPoints = [];
-        for (x = 0; x <= this.riverRightSideLimit + 30; x += 30) {
+        for (i = 0; i < this.levelPoints; i += 1) {
             controlPoints.push(vec3.fromValues(x, 0, this.streetZPositionValue));
-            if ((x % 2 === 0) && (x !== 0)) {
+            if ((i % 2 === 0) && (i !== 0)) {
                 this.loadCurvePointsToTrajectory(controlPoints, true);
                 controlPoints = [vec3.fromValues(x, 0, this.streetZPositionValue)];
             }
+            x += step;
         }
     };
     Street.prototype.streetRiverRightSide = function () {
-        var x;
+        var x = this.riverRightSideLimit;
+        var step = (360 - this.riverRightSideLimit) / (this.levelPoints - 1);
+        var i;
         var controlPoints = [];
-        for (x = this.riverLeftSideLimit; x <= 360; x += 30) {
+        for (i = 0; i < this.levelPoints; i += 1) {
             controlPoints.push(vec3.fromValues(x, 0, this.streetZPositionValue));
+            if ((i % 2 === 0) && (i !== 0)) {
+                this.loadCurvePointsToTrajectory(controlPoints, true);
+                controlPoints = [vec3.fromValues(x, 0, this.streetZPositionValue)];
+            }
+            x += step;
         }
-        this.loadCurvePointsToTrajectory(controlPoints, true);
     };
     Street.prototype.createStreetTrajectory = function () {
         this.streetRiverLeftSide();
@@ -143,45 +157,47 @@ var Street;
         }, this);
     };
     Street.prototype.streetInsideBridge = function () {
-        var xStep = (this.riverLeftSideLimit - this.riverRightSideLimit) / 12;
+        var xStep = (this.riverRightSideLimit - this.riverLeftSideLimit) / 12;
         var lastTrajectoryPointInserted = this.streetTrajectory[this.streetTrajectory.length - 1].position;
         var xBegin = lastTrajectoryPointInserted[0];
-        var controlPoints = [[xBegin, lastTrajectoryPointInserted[1], lastTrajectoryPointInserted[2]],
-            [xBegin + xStep, lastTrajectoryPointInserted[1], lastTrajectoryPointInserted[2]],
-            [xBegin + (2 * xStep), lastTrajectoryPointInserted[1] + controlValues.ph2 / 4, this.streetZPositionValue]];
+        var y = lastTrajectoryPointInserted[1];
+        var controlPoints = [[xBegin, y, lastTrajectoryPointInserted[2]],
+            [xBegin + xStep, y, lastTrajectoryPointInserted[2]],
+            [xBegin + (2 * xStep), y + controlValues.ph2 / 4, this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
-        controlPoints = [[xBegin + (2 * xStep), lastTrajectoryPointInserted[1] + controlValues.ph2 / 4, this.streetZPositionValue],
-            [xBegin + (3 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 2), this.streetZPositionValue],
-            [xBegin + (4 * xStep), lastTrajectoryPointInserted[1] + (3 * controlValues.ph2 / 4), this.streetZPositionValue]];
+        controlPoints = [[xBegin + (2 * xStep), y + controlValues.ph2 / 4, this.streetZPositionValue],
+            [xBegin + (3 * xStep), y + (controlValues.ph2 / 2), this.streetZPositionValue],
+            [xBegin + (4 * xStep), y + (3 * controlValues.ph2 / 4), this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
-        controlPoints = [[xBegin + (4 * xStep), lastTrajectoryPointInserted[1] + (3 * controlValues.ph2 / 4), this.streetZPositionValue],
-            [xBegin + (5 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 ), this.streetZPositionValue],
-            [xBegin + (6 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2), this.streetZPositionValue]];
+        controlPoints = [[xBegin + (4 * xStep), y + (3 * controlValues.ph2 / 4), this.streetZPositionValue],
+            [xBegin + (5 * xStep), y + (controlValues.ph2), this.streetZPositionValue],
+            [xBegin + (6 * xStep), y + (controlValues.ph2), this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
-        controlPoints = [[xBegin + (6 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2), this.streetZPositionValue],
-            [xBegin + (7 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2), this.streetZPositionValue],
-            [xBegin + (8 * xStep), lastTrajectoryPointInserted[1] + (3 * controlValues.ph2 / 4), this.streetZPositionValue]];
+        controlPoints = [[xBegin + (6 * xStep), y + (controlValues.ph2), this.streetZPositionValue],
+            [xBegin + (7 * xStep), y + (controlValues.ph2), this.streetZPositionValue],
+            [xBegin + (8 * xStep), y + (3 * controlValues.ph2 / 4), this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
-        controlPoints = [[xBegin + (8 * xStep), lastTrajectoryPointInserted[1] + (3 * controlValues.ph2 / 4), this.streetZPositionValue],
-            [xBegin + (9 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 2), this.streetZPositionValue],
-            [xBegin + (10 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 4), this.streetZPositionValue]];
+        controlPoints = [[xBegin + (8 * xStep), y + (3 * controlValues.ph2 / 4), this.streetZPositionValue],
+            [xBegin + (9 * xStep), y + (controlValues.ph2 / 2), this.streetZPositionValue],
+            [xBegin + (10 * xStep), y + (controlValues.ph2 / 4), this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
-        controlPoints = [[xBegin + (10 * xStep), lastTrajectoryPointInserted[1] + (controlValues.ph2 / 4), this.streetZPositionValue],
-            [xBegin + (11 * xStep), lastTrajectoryPointInserted[1], this.streetZPositionValue],
-            [xBegin + (12 * xStep), lastTrajectoryPointInserted[1], this.streetZPositionValue]];
+        controlPoints = [[xBegin + (10 * xStep), y + (controlValues.ph2 / 4), this.streetZPositionValue],
+            [xBegin + (11 * xStep), y, this.streetZPositionValue],
+            [xBegin + (12 * xStep), y, this.streetZPositionValue]];
         this.loadCurvePointsToTrajectory(controlPoints, false);
     };
     Street.prototype.draw = function (modelViewMatrix) {
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess, false);
         this.gl.uniform1i(this.shaderProgram.useNormalMap, 1);
-        //this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
+        this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
         this.textureHandler.setTextureUniform(this.streetTexture);
-        this.textureHandler.setTextureNormal(this.streetNormalTexture, this.streetTexture.length);
+        this.textureHandler.setTextureNormal(this.streetNormalTexture);
         this.sweptSurface.draw(modelViewMatrix);
         this.textureHandler.setTextureUniform(this.sideWalkTexture);
-        this.textureHandler.setTextureNormal(this.sideWalkNormalTexture, this.sideWalkTexture.length);
+        this.textureHandler.setTextureNormal(this.sideWalkNormalTexture);
         this.sideWalk.draw(modelViewMatrix);
         this.sideLeftWalk.draw(modelViewMatrix);
         this.gl.uniform1i(this.shaderProgram.useNormalMap, 0);
-        //this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
+        this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
     };
 }());

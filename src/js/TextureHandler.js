@@ -5,6 +5,7 @@ var TextureHandler = (function () {
     function init(graphicContainer) {
         var gl = graphicContainer.getContext();
         var shaderProgram = graphicContainer.getShaderProgram();
+        var terrainShaderProgram = graphicContainer.getTerrainShaderProgram();
 
         function loadCubemapFace(target, texture, src) {
             var image = new Image();
@@ -26,38 +27,61 @@ var TextureHandler = (function () {
                 gl.generateMipmap(gl.TEXTURE_2D);
                 gl.bindTexture(gl.TEXTURE_2D, null);
             },
-            initializeTexture: function (texturePaths) {
-                var textures = [];
+            initializeTexture: function (path) {
                 var currrentTextureHandler = this;
-                texturePaths.forEach(function (path) {
-                    var texture = gl.createTexture();
-                    texture.image = new Image();
-                    texture.image.onload = function () {
-                        currrentTextureHandler.generateMipMap(texture);
-                    };
-                    texture.image.src = path;
-                    textures.push(texture);
-                }, this);
-                return textures.slice(0);
+                var texture = gl.createTexture();
+                texture.image = new Image();
+                texture.image.onload = function () {
+                    currrentTextureHandler.generateMipMap(texture);
+                };
+                texture.image.src = path;
+                return texture;
             },
-            setTextureUniform: function (textures) {
-                textures.forEach(function (texture, index) {
-                    gl.activeTexture(gl.TEXTURE0 + index);
-                    gl.bindTexture(gl.TEXTURE_2D, texture);
-                    gl.uniform1i(shaderProgram.samplerUniform, index);
-                }, this);
+            setTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(shaderProgram.samplerUniform, 0);
             },
-            setTextureNormal: function (normalTextures, textureUnitIndex) {
-                normalTextures.forEach(function (normalTexture, index) {
-                    gl.activeTexture(gl.TEXTURE0 + textureUnitIndex + index);
-                    gl.bindTexture(gl.TEXTURE_2D, normalTexture);
-                    gl.uniform1i(shaderProgram.samplerNormal, textureUnitIndex + index);
-                }, this);
+            setTextureNormal: function (normalTexture) {
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, normalTexture);
+                gl.uniform1i(shaderProgram.samplerNormal, 1);
             },
             setCubemapTextureUniform: function (texture) {
                 gl.activeTexture(gl.TEXTURE2);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
                 gl.uniform1i(shaderProgram.cubeSamplerUniform, 2);
+            },
+            setGrassTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.grassSamplerUniform, 0);
+            },
+            setRockTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.rockSamplerUniform, 1);
+            },
+            setSandTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE2);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.sandSamplerUniform, 2);
+            },
+            setGrassNormalTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE3);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.grassNormalSamplerUniform, 3);
+            },
+            setRockNormalTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE4);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.rockNormalSamplerUniform, 4);
+            },
+            setSandNormalTextureUniform: function (texture) {
+                gl.activeTexture(gl.TEXTURE5);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.uniform1i(terrainShaderProgram.sandNormalSamplerUniform, 5);
+
             },
             initCubemapTexture: function (sources) {
                 var cubeTexture = gl.createTexture();

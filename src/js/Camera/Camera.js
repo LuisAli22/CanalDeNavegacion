@@ -3,10 +3,7 @@
 var Camera;
 (function () {
     "use strict";
-    Camera = function (sceneGraphicContainer) {
-        this.sceneGraphicContainer = sceneGraphicContainer;
-        this.gl = sceneGraphicContainer.getContext();
-        this.shaderProgram = this.sceneGraphicContainer.getShaderProgram();
+    Camera = function () {
         this.eye = vec3.create();
         vec3.set(this.eye, 0, 0, 0);
         this.target = vec3.create();

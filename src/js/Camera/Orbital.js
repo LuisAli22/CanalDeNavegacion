@@ -3,8 +3,8 @@
 var Orbital;
 (function () {
     "use strict";
-    Orbital = function (sceneGraphicContainer, radius, theta, phi) {
-        Camera.call(this, sceneGraphicContainer);
+    Orbital = function (radius, theta, phi) {
+        Camera.call(this);
         this.radius = radius;
         this.theta = theta;
         this.phi = phi;

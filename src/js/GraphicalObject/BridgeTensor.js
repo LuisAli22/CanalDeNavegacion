@@ -1,12 +1,23 @@
-/*global SweptSurface, Calculator, vec3, ModelViewMatrixStack, mat4, TOWERSCALEFACTOR*/
+/*global SweptSurface, Calculator, vec3, ModelViewMatrixStack, mat4, TOWERSCALEFACTOR, TextureHandler*/
 var BridgeTensor;
 (function () {
     "use strict";
     BridgeTensor = function (graphicContainer, trajectory, radius, uTextureScale, vTextureScale) {
+        this.graphicContainer = graphicContainer;
+        this.gl = graphicContainer.getContext();
+        this.shaderProgram = graphicContainer.getShaderProgram();
         this.radius = radius;
         this.levelGeometry = [];
         this.createLevelGeometry();
         this.sweptSurface = new SweptSurface(graphicContainer, this.levelGeometry, trajectory, uTextureScale, vTextureScale, false);
+        this.textureHandler = TextureHandler.getInstance(graphicContainer);
+        this.tensorTexture = this.textureHandler.initializeTexture("img/alambres.jpg");
+        this.tensorTextureNormal = this.textureHandler.initializeTexture("img/alambres-mormalmap.jpg");
+        this.materialKa = [0.3, 0.3, 0.3];
+        this.materialKd = [0.9, 0.9, 0.9];
+        this.materialKs = [0.9, 0.9, 0.9];
+        this.materialShininess = 4.0;
+        this.reflectFactor = 0.6;
     };
     BridgeTensor.prototype.createLevelGeometry = function () {
         var angle;
@@ -30,9 +41,14 @@ var BridgeTensor;
         }
     };
     BridgeTensor.prototype.draw = function (modelViewMatrix) {
-        /*var mvStack = ModelViewMatrixStack.getInstance();
-         mvStack.push(modelViewMatrix);*/
+        this.textureHandler.setTextureUniform(this.tensorTexture);
+        this.textureHandler.setTextureNormal(this.tensorTextureNormal);
+        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess, false);
+        this.gl.uniform1i(this.shaderProgram.useNormalMap, 1);
+        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 1);
+        this.gl.uniform1f(this.shaderProgram.reflectFactorUniform, this.reflectFactor);
         this.sweptSurface.draw(modelViewMatrix);
-        //mat4.copy(modelViewMatrix, mvStack.pop());
+        this.gl.uniform1i(this.shaderProgram.useNormalMap, 0);
+        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 0);
     };
 }());

@@ -14,7 +14,7 @@ var Tree;
         }
     };
     Tree.prototype.randomizeSize = function () {
-        var r = 3 + Math.random() * this.randomizeFactor;
+        var r = 2 + Math.random() * this.randomizeFactor;
         this.trunkHeight *= r;
         this.trunkRadius *= r;
         this.crownRadius *= r;

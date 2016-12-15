@@ -6,6 +6,7 @@ var GraphicalObject;
         this.graphicContainer = graphicContainer;
         this.gl = graphicContainer.getContext();
         this.shaderProgram = graphicContainer.getShaderProgram();
+        this.terrainShaderProgram = graphicContainer.getTerrainShaderProgram();
         this.bufferList = {
             "position": [],
             "normal": [],
@@ -84,23 +85,30 @@ var GraphicalObject;
     GraphicalObject.prototype.defineGenericVertexAtributeArray = function () {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_position_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.webgl_position_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexPositionAttribute, this.webgl_position_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_texture_coord_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.webgl_texture_coord_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(this.terrainShaderProgram.textureCoordAttribute, this.webgl_texture_coord_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexNormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         if (this.webgl_tangent_buffer !== null) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_tangent_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexTangentAttribute, this.webgl_tangent_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         } else {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexTangentAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexTangentAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         }
         if (this.webgl_binormal_buffer !== null) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_binormal_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexBinormalAttribute, this.webgl_binormal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexBinormalAttribute, this.webgl_binormal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         } else {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.webgl_normal_buffer);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexBinormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.terrainShaderProgram.vertexBinormalAttribute, this.webgl_normal_buffer.itemSize, this.gl.FLOAT, false, 0, 0);
         }
     };
     GraphicalObject.prototype.draw = function (modelViewMatrix) {

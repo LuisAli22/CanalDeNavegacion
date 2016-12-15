@@ -4,10 +4,8 @@ var Bridge;
     "use strict";
     Bridge = function (graphicContainer, bottomRiverYValue, riverWidth, street, xLeftSide, xRightSide) {
         this.graphicContainer = graphicContainer;
-        this.gl = graphicContainer.getContext();
-        this.shaderProgram = graphicContainer.getShaderProgram();
-        this.xLeftSide = xLeftSide - 10;
-        this.xRightSide = xRightSide + 10;
+        this.xLeftSide = xLeftSide + 20;
+        this.xRightSide = xRightSide - 20;
         this.bottomRiverValue = bottomRiverYValue;
         this.riverWidth = riverWidth;
         this.streetZPositionValue = (controlValues.bridgePosition / 100) * 360;
@@ -18,14 +16,6 @@ var Bridge;
         this.streetTrajectory = street.getTrajectory();
         this.streetBorderHeight = street.getBorderHeight();
         this.towerTh1 = 0;
-        this.textureHandler = TextureHandler.getInstance(graphicContainer);
-        this.tensorTexture = this.textureHandler.initializeTexture(["img/alambres.jpg"]);
-        this.tensorTextureNormal = this.textureHandler.initializeTexture(["img/alambres-mormalmap.jpg"]);
-        this.materialKa = [0.3, 0.3, 0.3];
-        this.materialKd = [0.9, 0.9, 0.9];
-        this.materialKs = [0.9, 0.9, 0.9];
-        this.materialShininess = 40.0;
-        this.reflectFactor = 0.7;
         this.leftSideTensorTrajectory = [];
         this.rightSideTensorTrajectory = [];
         this.secondaryTensors = [];
@@ -148,7 +138,7 @@ var Bridge;
         var currentPosition;
         for (indexStreet = 0; indexStreet < this.streetTrajectory.length; indexStreet += 1) {
             currentPosition = this.streetTrajectory[indexStreet].position;
-            if (Math.abs(currentPosition[0] - this.towerXPosition) < 5) {
+            if (Math.abs(currentPosition[0] - this.towerXPosition) < 15) {
                 return currentPosition[1] + Math.abs(this.bottomRiverValue);
             }
         }
@@ -174,10 +164,10 @@ var Bridge;
     Bridge.prototype.createExtremeTensorTrajectory = function (towerIndex) {
         var signOrientation = 1;
         if (towerIndex === 0) {
-            this.createTrajectoryAndSecondaryTensors(this.xRightSide + 30, this.leftSideTensorTrajectory, signOrientation, false);
+            this.createTrajectoryAndSecondaryTensors(this.xLeftSide + 30, this.leftSideTensorTrajectory, signOrientation, false);
         } else {
             signOrientation *= -1;
-            this.createTrajectoryAndSecondaryTensors(this.xLeftSide - 30, this.rightSideTensorTrajectory, signOrientation, true);
+            this.createTrajectoryAndSecondaryTensors(this.xRightSide - 30, this.rightSideTensorTrajectory, signOrientation, true);
         }
     };
     Bridge.prototype.initTowers = function () {
@@ -246,17 +236,9 @@ var Bridge;
         this.towers.forEach(function (tower) {
             tower.draw(modelViewMatrix);
         }, this);
-        this.textureHandler.setTextureUniform(this.tensorTexture);
-        this.textureHandler.setTextureNormal(this.tensorTextureNormal, this.tensorTexture.length);
-        this.graphicContainer.setMaterialUniforms(this.materialKa, this.materialKd, this.materialKs, this.materialShininess);
-        this.gl.uniform1i(this.shaderProgram.useNormalMap, 1);
-        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 1);
-        this.gl.uniform1f(this.shaderProgram.reflectFactorUniform, this.reflectFactor);
         this.drawExtremeTensors(modelViewMatrix);
         this.drawMiddleTensors(modelViewMatrix);
         this.drawSecondaryTensors(modelViewMatrix, this.secondaryTensors, -this.streetWidth);
         this.drawSecondaryTensors(modelViewMatrix, this.middleSecondaryTensors, this.streetWidth);
-        this.gl.uniform1i(this.shaderProgram.useNormalMap, 0);
-        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 0);
     };
 }());

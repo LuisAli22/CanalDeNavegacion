@@ -11,21 +11,20 @@ var Sky;
         this.cube = new Cube(graphicContainer);
     };
     Sky.prototype.draw = function (modelViewMatrix) {
-        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 1);
         this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 1);
         this.gl.uniform1i(this.shaderProgram.drawSkyBoxUniform, 1);
         this.textureHandler.setCubemapTextureUniform(this.texture);
 
         var mvStack = ModelViewMatrixStack.getInstance();
         mvStack.push(modelViewMatrix);
-        mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 2, vec3.fromValues(0, 1, 0));
+        mat4.rotate(modelViewMatrix, modelViewMatrix, -Math.PI, vec3.fromValues(0, 1, 0));
+        mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI, vec3.fromValues(0, 0, 1));
         mat4.translate(modelViewMatrix, modelViewMatrix, vec3.fromValues(-1 / 2, 1 / 2, -1 / 2));
         mat4.scale(modelViewMatrix, modelViewMatrix, vec3.fromValues(SKYDIMENSION, SKYDIMENSION, SKYDIMENSION));
         this.cube.draw(modelViewMatrix);
         mat4.copy(modelViewMatrix, mvStack.pop());
 
         this.gl.uniform1i(this.shaderProgram.drawSkyBoxUniform, 0);
-        this.gl.uniform1i(this.shaderProgram.useReflectionUniform, 0);
         this.gl.uniform1i(this.shaderProgram.useDiffuseMap, 0);
     };
     Sky.prototype.initTextureSources = function () {

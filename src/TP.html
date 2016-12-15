@@ -88,6 +88,7 @@
 			varying vec3 binormalInterp;
 
 			varying vec3 vertPos;
+			varying vec3 position;
 			varying vec2 vTextureCoord;
 			varying vec2 vWaveTextureCoords[4];
 
@@ -135,7 +136,7 @@
 				float x = aVertexPosition.x;
 				float y = aVertexPosition.y;
 				float z = aVertexPosition.z;
-
+                position = aVertexPosition;
 				vec3 normal = aVertexNormal;
 				vec3 tangent = aVertexTangent;
 				vec3 binormal = aVertexBinormal;
@@ -160,15 +161,15 @@
     			tangentInterp = normalize(uNMatrix * tangent);
     			binormalInterp = normalize(uNMatrix * binormal);
 
-                if (uUseReflection) {
-                    if (uDrawSkyBox) {
-    					reflectDir = vec3(x, y, z);
-    				} else {
-    					vec3 view = normalize(vertPos);
-    					reflectDir = reflect(view, normalInterp);
-    					reflectDir = vec3(uInverseVMatrix * vec4(reflectDir, 0.0));
-    				}
-    			}
+                if (uDrawSkyBox) {
+                    reflectDir = vec3(x, y, z);
+                } else {
+                    if (uUseReflection) {
+                        vec3 view = normalize(vertPos);
+                        reflectDir = reflect(view, normalInterp);
+                        reflectDir = vec3(uInverseVMatrix * vec4(reflectDir, 0.0));
+                    }
+                }
 			}
 
     </script>
@@ -176,6 +177,7 @@
     <script id="shader-fs" type="x-shader/x-fragment">
 			uniform bool uUseNormalMap;
 			uniform bool uUseDiffuseMap;
+			uniform bool isTower;
 			precision mediump float;
 			uniform sampler2D uSampler;
 			uniform sampler2D uNormalSampler;
@@ -214,7 +216,21 @@
 			};
 
 			uniform Material uMaterial;
-            vec3 phongModel (vec3 vertPos, vec3 normal, bool useDiffuse) {
+			vec4 getFragColor (vec3 normal, vec4 cubemapColor, vec4 textureColor, vec3 vLight) {
+				if (uUseReflection) {
+						return vec4(mix(textureColor, cubemapColor, uReflectFactor).rgb * vLight, textureColor.a).rgba;
+    			}
+                if (uDrawSkyBox) {
+                    return cubemapColor;
+                }
+                if (uUseDiffuseMap) {
+                    vec3 lightDir = normalize(uLight.Position - vertPos);
+                    vec3 diffuse = textureColor.rgb * uLight.Ld * max(dot(lightDir,normal), 0.0) * uMaterial.Kd;
+                    return vec4(diffuse, 1.0);
+                }
+                 return vec4(textureColor.rgb * vLight, textureColor.a);
+			}
+            vec3 phongModel (vec3 vertPos, vec3 normal) {
                 vec3 lightDir = normalize(uLight.Position - vertPos);
                 vec3 lightReflectDir = reflect(-lightDir, normal);
                 vec3 viewDir = normalize(-vertPos);
@@ -226,9 +242,6 @@
                     float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
                     specular = uLight.Ls * uMaterial.Ks * pow(specAngle, uMaterial.Shininess);
                 }
-                if (useDiffuse) {
-    			    return diffuse;
-    			}
                 return ambient + diffuse + specular;
            }
 			void main() {
@@ -239,29 +252,182 @@
     				vec3 binormal = normalize(binormalInterp);
 
     				mat3 tbn = mat3(tangent, binormal, normal);
-    				vec3 normalCoordinate = texture2D(uNormalSampler, vec2(vTextureCoord.s, vTextureCoord.t)).xyz * 2.0 - 1.0;
-
+    				vec3 normalCoordinate;
+    				if (isTower) {
+                        normalCoordinate = texture2D(uNormalSampler, vec2(vTextureCoord.s, vTextureCoord.t)).xyz * 2.0 - 1.0 ;
+    				} else {
+                        normalCoordinate = texture2D(uNormalSampler, vec2(vTextureCoord.s, vTextureCoord.t)).xyz;
+    				}
     				//Transform the normal vector in the RGB channels to tangent space
     				normal = normalize(tbn * normalCoordinate);
     			}
-    			vec3 vLight = phongModel(vertPos, normal, uUseDiffuseMap);
+    			vec3 vLight = phongModel(vertPos, normal);
 
     			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    			vec4 cubemapColor = textureCube(uCubeSampler, reflectDir);
     			if (uUseBlending) {
     				textureColor.a *= uAlpha;
     			}
-				if (uUseReflection) {
-    				vec4 cubemapColor = textureCube(uCubeSampler, reflectDir);
-					if (uDrawSkyBox) {
-    					gl_FragColor = cubemapColor;
-    				} else {
-						gl_FragColor = vec4(mix(textureColor, cubemapColor, uReflectFactor).rgb * vLight, textureColor.a).rgba;
-    				}
-    			} else {
-					gl_FragColor = vec4(textureColor.rgb * vLight, textureColor.a);
-    			}
+    			gl_FragColor = getFragColor(normal, cubemapColor, textureColor, vLight);
 			}
 
+
+    </script>
+    <script id="shader-terrain-fs" type="x-shader/x-fragment">
+        uniform bool uUseNormalMap;
+        uniform bool uUseDiffuseMap;
+        precision mediump float;
+        uniform sampler2D uGrassSampler;
+        uniform sampler2D uRockSampler;
+        uniform sampler2D uSandSampler;
+        uniform sampler2D uGrassNormalSampler;
+        uniform sampler2D uRockNormalSampler;
+        uniform sampler2D uSandNormalSampler;
+
+        varying vec3 normalInterp;
+        varying vec3 tangentInterp;
+        varying vec3 binormalInterp;
+
+        varying vec3 position;
+        varying vec3 vertPos;
+        varying vec2 vTextureCoord;
+
+		uniform float uAlpha;
+
+        struct Light{
+            vec3 Position; // Light position in eye coords.
+            vec3 La; // Ambient light intensity
+            vec3 Ld; // Diffuse light intensity
+            vec3 Ls; // Specular light intensity
+        };
+        uniform Light uLight;
+
+        struct Material{
+            vec3 Ka; // Ambient light
+            vec3 Kd; // Diffuse light
+            vec3 Ks; // Specular light
+            float Shininess;
+        };
+
+        uniform Material uMaterial;
+        vec3 phongModel (vec3 vertPos, vec3 normal) {
+            vec3 lightDir = normalize(uLight.Position - vertPos);
+            vec3 lightReflectDir = reflect(-lightDir, normal);
+            vec3 viewDir = normalize(-vertPos);
+            vec3 ambient = uLight.La * uMaterial.Ka;
+            float lambertian = max(dot(lightDir,normal), 0.0);
+            vec3 diffuse = lambertian * uLight.Ld * uMaterial.Kd;
+            vec3 specular = vec3(0.0);
+            if(lambertian > 0.0) {
+                float specAngle = max(dot(lightReflectDir, viewDir), 0.0);
+                specular = uLight.Ls * uMaterial.Ks * pow(specAngle, uMaterial.Shininess);
+            }
+
+            return ambient + diffuse + specular;
+       }
+       highp float rand(vec2 co) {
+            highp float a = 15.0;
+            highp float b = 100.0;
+            highp float c = 43758.5453;
+            highp float dt= dot(co.xy ,vec2(a,b));
+            highp float sn= mod(dt,3.14);
+            return fract(sin(sn) * c);
+        }
+        vec4 getDiffuseOrCommonFragColor (vec4 textureColor, vec3 normal, vec3 vLight) {
+            if (uUseDiffuseMap) {
+                vec3 lightDir = normalize(uLight.Position - vertPos);
+                vec3 diffuse = textureColor.rgb * uLight.Ld * max(dot(lightDir,normal), 0.0) * uMaterial.Kd;
+                return vec4(diffuse, 1.0);
+             }
+            return vec4(textureColor.rgb * vLight, textureColor.a);
+        }
+       vec4 getFragmentColor (float height, vec3 normal, vec3 vLight) {
+            float uTextureScale;
+            float vTextureScale;
+            if (height < 0.0) {
+                uTextureScale = (1.0 / 32.0);
+                vTextureScale = 10.0;
+            } else {
+                uTextureScale = (1.0 / 40.0);
+                vTextureScale = 20.0;
+            }
+            vec4 texColorGrass = texture2D(uGrassSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale));
+            vec4 texColorRock = texture2D(uRockSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale));
+            vec4 texColorSand = texture2D(uSandSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale));
+            vec4 texColorGrassRock;
+            vec4 texColorRockSand ;
+
+           if (height >= 0.0) {
+                return getDiffuseOrCommonFragColor(texColorGrass, normal, vLight);
+           }
+           if (height < 0.0 && height >= -1.4) {
+                texColorGrassRock = mix(texColorGrass, texColorRock, 0.4);
+                return getDiffuseOrCommonFragColor(texColorGrassRock, normal, vLight);
+           }
+           if (height < -1.4 && height >= -2.8) {
+                texColorGrassRock = mix(texColorGrass, texColorRock, 0.6);
+                return getDiffuseOrCommonFragColor(texColorGrassRock, normal, vLight);
+           }
+           if (height < -2.8 && height >= -4.2) {
+                return getDiffuseOrCommonFragColor(texColorRock, normal, vLight);
+           }
+           if (height < - 4.2 && height >= -5.7) {
+                texColorRockSand = mix(texColorRock, texColorSand, 0.4);
+                return getDiffuseOrCommonFragColor(texColorRockSand, normal, vLight);
+           }
+           if (height < - 5.7 && height >= -7.1) {
+                texColorRockSand = mix(texColorRock, texColorSand, 0.6);
+                return getDiffuseOrCommonFragColor(texColorRockSand, normal, vLight);
+           }
+           return gl_FragColor = getDiffuseOrCommonFragColor(texColorSand, normal, vLight);
+       }
+       vec3 getNormalCoordinate (float height) {
+            float uTextureScale = 1.0;
+            float vTextureScale = 1.0;
+            if (height >= 0.0) {
+                uTextureScale = (1.0 / 40.0);
+                vTextureScale = 20.0;
+            }
+            vec3 normalCoordinateGrass = texture2D(uGrassNormalSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale)).xyz;
+            vec3 normalCoordinateRock = texture2D(uRockNormalSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale)).xyz;
+            vec3 normalCoordinateSand = texture2D(uSandNormalSampler, vec2(vTextureCoord.s * uTextureScale, vTextureCoord.t * vTextureScale)).xyz;
+
+           if (height >= 0.0) {
+                return normalCoordinateGrass;
+           }
+           if (height < 0.0 && height >= -1.4) {
+                return mix(normalCoordinateGrass, normalCoordinateRock, 0.4);
+           }
+           if (height < -1.4 && height >= -2.8) {
+                return mix(normalCoordinateGrass, normalCoordinateRock, 0.6);
+           }
+           if (height < -2.8 && height >= -4.2) {
+                return normalCoordinateRock;
+           }
+           if (height < - 4.2 && height >= -5.7) {
+                return mix(normalCoordinateRock, normalCoordinateSand, 0.4);
+           }
+           if (height < - 5.7 && height >= -7.1) {
+                return mix(normalCoordinateRock, normalCoordinateSand, 0.6);
+           }
+           return normalCoordinateSand;
+       }
+        void main() {
+            vec3 normal = normalize(normalInterp);
+
+            if (uUseNormalMap && position.y < 0.0){
+                vec3 tangent = normalize(tangentInterp);
+                vec3 binormal = normalize(binormalInterp);
+
+                mat3 tbn = mat3(tangent, binormal, normal);
+                vec3 normalCoordinate = getNormalCoordinate(position.y);
+
+                //Transform the normal vector in the RGB channels to tangent space
+                normal = normalize(tbn * normalCoordinate);
+            }
+            vec3 vLight = phongModel(vertPos, normal);
+            gl_FragColor = getFragmentColor(position.y, normal, vLight);
+        }
     </script>
 
     <script type="text/javascript">
@@ -322,8 +488,7 @@
 <section id="camaras">
     <h2>Alternar C&aacutemaras</h2>
     <dl>
-        <dt class="thick"><b style="color:blue;">Aletrna en el &oacuterden Orbital / Persona en el puente / Persona en
-            el barco</b></dt>
+        <dt class="thick"><b style="color:blue;">Aletrna en el &oacuterden Orbital / Persona en el puente</b></dt>
         <dd class="italic">Tecla <b>C</b></dd>
     </dl>
 </section>
@@ -338,8 +503,7 @@
     </dl>
 </section>
 <section id="CamaraPrimeraPersona">
-    <h2>C&aacutemara de primera persona <b style="color:blue;font-size:70%;">(tanto en el puente como en el barco)</b>
-    </h2>
+    <h2>C&aacutemara de primera persona </h2>
     <dl>
         <dt class="thick">Desplazarse</dt>
         <dd class="italic">Izquierda/Atr&aacutes/Derecha/Adelante, <b>a/s/d/w</b> respectivamente

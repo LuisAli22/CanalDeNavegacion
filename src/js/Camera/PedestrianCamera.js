@@ -4,8 +4,8 @@
 var PedestrianCamera;
 (function () {
     "use strict";
-    PedestrianCamera = function (sceneGraphicContainer, street) {
-        Orbital.call(this, sceneGraphicContainer, RADIUSPEDESTRIANPOSITION, TITAPEDESTRIANPOSITION, FIPEDESTRIANPOSITION);
+    PedestrianCamera = function (street) {
+        Orbital.call(this, RADIUSPEDESTRIANPOSITION, TITAPEDESTRIANPOSITION, FIPEDESTRIANPOSITION);
         this.trajectory = street.getTrajectory();
         this.streetZPosition = street.getZPositionValue();
         this.streetWidth = street.getWidth();
